@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Aven Demo - Voice-Controlled Form</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 2rem;
+                background: #f5f5f5;
+            }
+
+            h1 {
+                color: #333;
+                margin-bottom: 0.5rem;
+            }
+
+            .subtitle {
+                color: #666;
+                margin-bottom: 2rem;
+            }
+
+            .card {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 1.5rem;
+            }
+
+            .card h2 {
+                margin-top: 0;
+                color: #333;
+                font-size: 1.2rem;
+            }
+
+            /* Connection Section */
+            .connection-section {
+                display: flex;
+                gap: 1rem;
+                align-items: flex-end;
+                flex-wrap: wrap;
+            }
+
+            .input-group {
+                flex: 1;
+                min-width: 250px;
+            }
+
+            .input-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+                color: #555;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .btn-primary {
+                background: #4f46e5;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: #4338ca;
+            }
+
+            .btn-primary:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
+
+            .btn-danger {
+                background: #ef4444;
+                color: white;
+            }
+
+            .btn-danger:hover {
+                background: #dc2626;
+            }
+
+            /* Status Indicator */
+            .status {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            .status-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+            }
+
+            .status.idle {
+                background: #f3f4f6;
+                color: #6b7280;
+            }
+
+            .status.idle .status-dot {
+                background: #9ca3af;
+            }
+
+            .status.connecting {
+                background: #fef3c7;
+                color: #d97706;
+            }
+
+            .status.connecting .status-dot {
+                background: #f59e0b;
+                animation: pulse 1s infinite;
+            }
+
+            .status.connected {
+                background: #d1fae5;
+                color: #059669;
+            }
+
+            .status.connected .status-dot {
+                background: #10b981;
+            }
+
+            .status.error {
+                background: #fee2e2;
+                color: #dc2626;
+            }
+
+            .status.error .status-dot {
+                background: #ef4444;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+            }
+
+            /* Form Section */
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .form-grid .full-width {
+                grid-column: 1 / -1;
+            }
+
+            .form-field {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-field label {
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+                color: #555;
+            }
+
+            .form-field input,
+            .form-field select,
+            .form-field textarea {
+                padding: 0.75rem;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 0.95rem;
+                transition: border-color 0.2s;
+            }
+
+            .form-field input:focus,
+            .form-field select:focus,
+            .form-field textarea:focus {
+                outline: none;
+                border-color: #4f46e5;
+            }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 100px;
+            }
+
+            /* Conversation Section */
+            .conversation {
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                padding: 1rem;
+                background: #fafafa;
+            }
+
+            .message {
+                margin-bottom: 1rem;
+                padding: 0.75rem 1rem;
+                border-radius: 12px;
+                max-width: 85%;
+            }
+
+            .message.user {
+                background: #4f46e5;
+                color: white;
+                margin-left: auto;
+            }
+
+            .message.assistant {
+                background: #e5e7eb;
+                color: #333;
+            }
+
+            .message .role {
+                font-size: 0.75rem;
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+                opacity: 0.8;
+            }
+
+            .no-messages {
+                text-align: center;
+                color: #999;
+                font-style: italic;
+            }
+
+            /* Action Log */
+            .action-log {
+                max-height: 200px;
+                overflow-y: auto;
+                font-family: "Monaco", "Menlo", monospace;
+                font-size: 0.85rem;
+                background: #1e1e1e;
+                color: #d4d4d4;
+                padding: 1rem;
+                border-radius: 8px;
+            }
+
+            .action-entry {
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid #333;
+            }
+
+            .action-entry:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+
+            .action-text {
+                color: #9cdcfe;
+            }
+
+            .action-code {
+                color: #ce9178;
+                margin-top: 0.25rem;
+            }
+
+            .action-result {
+                color: #6a9955;
+                margin-top: 0.25rem;
+            }
+
+            .action-error {
+                color: #f44747;
+            }
+
+            /* Speaking Indicator */
+            .speaking-indicator {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                background: #eef2ff;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+            }
+
+            .speaking-indicator.hidden {
+                display: none;
+            }
+
+            .speaking-bars {
+                display: flex;
+                gap: 2px;
+                align-items: center;
+            }
+
+            .speaking-bar {
+                width: 3px;
+                height: 12px;
+                background: #4f46e5;
+                border-radius: 2px;
+                animation: speaking 0.5s ease-in-out infinite;
+            }
+
+            .speaking-bar:nth-child(2) {
+                animation-delay: 0.1s;
+            }
+            .speaking-bar:nth-child(3) {
+                animation-delay: 0.2s;
+            }
+            .speaking-bar:nth-child(4) {
+                animation-delay: 0.3s;
+            }
+
+            @keyframes speaking {
+                0%,
+                100% {
+                    transform: scaleY(0.5);
+                }
+                50% {
+                    transform: scaleY(1);
+                }
+            }
+
+            /* Responsive */
+            @media (max-width: 600px) {
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .connection-section {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🎙️ Aven Demo</h1>
+        <p class="subtitle">
+            Voice-controlled form filling powered by OpenAI Realtime API
+        </p>
+
+        <!-- Connection Card -->
+        <div class="card">
+            <h2>Connection</h2>
+            <div class="connection-section">
+                <div class="input-group">
+                    <label for="clientSecret"
+                        >Client Secret (Ephemeral Key)</label
+                    >
+                    <input
+                        type="password"
+                        id="clientSecret"
+                        placeholder="ek_..."
+                    />
+                </div>
+                <button id="connectBtn" class="btn btn-primary">Connect</button>
+            </div>
+            <div
+                style="
+                    margin-top: 1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                "
+            >
+                <span class="status idle" id="statusIndicator">
+                    <span class="status-dot"></span>
+                    <span id="statusText">Idle</span>
+                </span>
+                <span
+                    id="speakingState"
+                    style="color: #666; font-size: 0.9rem"
+                ></span>
+            </div>
+        </div>
+
+        <!-- Form Card (UI Target) -->
+        <div class="card" id="formContainer">
+            <h2>📝 Contact Form</h2>
+            <p style="color: #666; margin-bottom: 1rem">
+                Try saying: "Fill the name field with John Doe" or "Set the
+                email to john@example.com"
+            </p>
+
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="firstName">First Name</label>
+                    <input
+                        type="text"
+                        id="firstName"
+                        placeholder="Enter first name"
+                    />
+                </div>
+
+                <div class="form-field">
+                    <label for="lastName">Last Name</label>
+                    <input
+                        type="text"
+                        id="lastName"
+                        placeholder="Enter last name"
+                    />
+                </div>
+
+                <div class="form-field">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter email address"
+                    />
+                </div>
+
+                <div class="form-field">
+                    <label for="phone">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        placeholder="Enter phone number"
+                    />
+                </div>
+
+                <div class="form-field">
+                    <label for="department">Department</label>
+                    <select id="department">
+                        <option value="">Select department...</option>
+                        <option value="sales">Sales</option>
+                        <option value="support">Support</option>
+                        <option value="engineering">Engineering</option>
+                        <option value="marketing">Marketing</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="priority">Priority</label>
+                    <select id="priority">
+                        <option value="">Select priority...</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+
+                <div class="form-field full-width">
+                    <label for="message">Message</label>
+                    <textarea
+                        id="message"
+                        placeholder="Enter your message..."
+                    ></textarea>
+                </div>
+
+                <div class="full-width" style="display: flex; gap: 1rem">
+                    <button
+                        type="button"
+                        id="submitBtn"
+                        class="btn btn-primary"
+                    >
+                        Submit Form
+                    </button>
+                    <button
+                        type="button"
+                        id="clearBtn"
+                        class="btn"
+                        style="background: #e5e7eb; color: #333"
+                    >
+                        Clear Form
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Card -->
+        <div class="card">
+            <h2>💬 Conversation</h2>
+            <div id="speakingIndicator" class="speaking-indicator hidden">
+                <div class="speaking-bars">
+                    <div class="speaking-bar"></div>
+                    <div class="speaking-bar"></div>
+                    <div class="speaking-bar"></div>
+                    <div class="speaking-bar"></div>
+                </div>
+                <span id="speakingText">AI is speaking...</span>
+            </div>
+            <div class="conversation" id="conversation">
+                <div class="no-messages">
+                    No messages yet. Connect and start talking!
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Log Card -->
+        <div class="card">
+            <h2>⚡ Action Log</h2>
+            <div class="action-log" id="actionLog">
+                <div style="color: #666">UI actions will appear here...</div>
+            </div>
+        </div>
+
+        <!-- Import Aven from dist folder -->
+        <script type="module">
+            // Global error handler
+            window.onerror = function (msg, url, line, col, error) {
+                console.error("Global error:", msg, url, line, col, error);
+                alert("Error: " + msg);
+                return false;
+            };
+            window.addEventListener("unhandledrejection", function (event) {
+                console.error("Unhandled rejection:", event.reason);
+                alert("Unhandled promise rejection: " + event.reason);
+            });
+
+            import { Aven } from "../dist/index.js";
+
+            // Make it globally available for debugging
+            window.Aven = Aven;
+            console.log("Aven loaded:", Aven);
+
+            // DOM Elements
+            const clientSecretInput = document.getElementById("clientSecret");
+            const connectBtn = document.getElementById("connectBtn");
+            const statusIndicator = document.getElementById("statusIndicator");
+            const statusText = document.getElementById("statusText");
+            const speakingState = document.getElementById("speakingState");
+            const speakingIndicator =
+                document.getElementById("speakingIndicator");
+            const speakingTextEl = document.getElementById("speakingText");
+            const conversation = document.getElementById("conversation");
+            const actionLog = document.getElementById("actionLog");
+            const formContainer = document.getElementById("formContainer");
+            const submitBtn = document.getElementById("submitBtn");
+            const clearBtn = document.getElementById("clearBtn");
+
+            let aven = null;
+
+            // Update status indicator
+            function updateStatus(status) {
+                statusIndicator.className = `status ${status}`;
+                const statusLabels = {
+                    idle: "Idle",
+                    connecting: "Connecting...",
+                    connected: "Connected",
+                    error: "Error",
+                };
+                statusText.textContent = statusLabels[status] || status;
+
+                // Update button
+                if (status === "connected") {
+                    connectBtn.textContent = "Disconnect";
+                    connectBtn.className = "btn btn-danger";
+                    connectBtn.disabled = false;
+                } else if (status === "connecting") {
+                    connectBtn.textContent = "Connecting...";
+                    connectBtn.disabled = true;
+                } else {
+                    connectBtn.textContent = "Connect";
+                    connectBtn.className = "btn btn-primary";
+                    connectBtn.disabled = false;
+                }
+            }
+
+            // Update conversation state indicator
+            function updateConversationState(state) {
+                const stateLabels = {
+                    idle: "",
+                    ai_speaking: "🔊 AI Speaking",
+                    user_turn: "🎤 Your turn",
+                    user_speaking: "🎙️ Listening...",
+                };
+                speakingState.textContent = stateLabels[state] || "";
+
+                // Show/hide speaking indicator
+                if (state === "ai_speaking") {
+                    speakingIndicator.classList.remove("hidden");
+                    speakingTextEl.textContent = "AI is speaking...";
+                } else if (state === "user_speaking") {
+                    speakingIndicator.classList.remove("hidden");
+                    speakingTextEl.textContent = "Listening...";
+                } else {
+                    speakingIndicator.classList.add("hidden");
+                }
+            }
+
+            // Add message to conversation
+            function addMessage(message) {
+                // Remove "no messages" placeholder
+                const placeholder = conversation.querySelector(".no-messages");
+                if (placeholder) placeholder.remove();
+
+                const div = document.createElement("div");
+                div.className = `message ${message.role}`;
+
+                const role = document.createElement("div");
+                role.className = "role";
+                role.textContent =
+                    message.role === "user" ? "You" : "Assistant";
+
+                const content = document.createElement("div");
+                if (message.content.type === "text") {
+                    content.textContent = message.content.text;
+                } else {
+                    content.textContent =
+                        message.content.transcript || "(audio)";
+                }
+
+                div.appendChild(role);
+                div.appendChild(content);
+                conversation.appendChild(div);
+                conversation.scrollTop = conversation.scrollHeight;
+            }
+
+            // Log action
+            function logAction(action, result) {
+                // Clear placeholder
+                if (actionLog.querySelector("div[style]")) {
+                    actionLog.innerHTML = "";
+                }
+
+                const entry = document.createElement("div");
+                entry.className = "action-entry";
+
+                entry.innerHTML = `
+                <div class="action-text">📢 ${action.outputText}</div>
+                ${
+                    action.outputCode
+                        ? `<div class="action-code">⚡ ${action.outputCode}</div>`
+                        : ""
+                }
+                ${
+                    result
+                        ? `<div class="${
+                              result.success ? "action-result" : "action-error"
+                          }">
+                    ${result.success ? "✓ Success" : "✗ " + result.error}
+                </div>`
+                        : ""
+                }
+            `;
+
+                actionLog.appendChild(entry);
+                actionLog.scrollTop = actionLog.scrollHeight;
+            }
+
+            // Connect/disconnect
+            async function toggleConnection() {
+                console.log("toggleConnection called");
+                if (aven && aven.isConnected) {
+                    aven.disconnect();
+                    aven = null;
+                    return;
+                }
+
+                const clientSecret = clientSecretInput.value.trim();
+                console.log(
+                    "Client secret:",
+                    clientSecret ? "provided" : "empty"
+                );
+                if (!clientSecret) {
+                    alert("Please enter a client secret");
+                    return;
+                }
+
+                console.log("Creating Aven instance...");
+                // Create Aven instance
+                try {
+                    aven = new Aven({
+                        clientSecret,
+                        agent: {
+                            name: "Form Assistant",
+                            instructions: `You are a helpful assistant that helps users fill out a contact form.
+                    
+The form has these fields:
+- First Name (id: firstName)
+- Last Name (id: lastName)
+- Email Address (id: email)
+- Phone Number (id: phone)
+- Department (id: department) - options: sales, support, engineering, marketing
+- Priority (id: priority) - options: low, medium, high, urgent
+- Message (id: message) - textarea
+
+When the user asks to fill a field, use the execute_ui_action tool to set the value.
+Be friendly and confirm what you've done.`,
+                        },
+                        debug: true,
+                        ui: {
+                            enabled: true,
+                            rootElement: formContainer,
+                            autoUpdate: true,
+                            autoUpdateInterval: 3000,
+                        },
+                    });
+                    console.log("Aven instance created:", aven);
+                } catch (err) {
+                    console.error("Failed to create Aven instance:", err);
+                    alert("Failed to create Aven: " + err.message);
+                    return;
+                }
+
+                // Set up event listeners
+                aven.on("statusChange", updateStatus);
+                aven.on("conversationStateChange", updateConversationState);
+                aven.on("message", addMessage);
+                aven.on("error", (err) => {
+                    console.error("Error:", err);
+                    alert("Error: " + err);
+                });
+
+                aven.on("action", (action) => {
+                    console.log("Action executed:", action);
+                    // Actions are auto-executed by default, just log them
+                    logAction(action, { success: true });
+                });
+
+                try {
+                    console.log("Calling aven.connect()...");
+                    await aven.connect();
+                    console.log("Connected successfully!");
+                } catch (err) {
+                    console.error("Connection failed:", err);
+                    alert("Connection failed: " + err.message);
+                }
+            }
+
+            // Event listeners
+            connectBtn.addEventListener("click", toggleConnection);
+
+            submitBtn.addEventListener("click", () => {
+                const formData = {
+                    firstName: document.getElementById("firstName").value,
+                    lastName: document.getElementById("lastName").value,
+                    email: document.getElementById("email").value,
+                    phone: document.getElementById("phone").value,
+                    department: document.getElementById("department").value,
+                    priority: document.getElementById("priority").value,
+                    message: document.getElementById("message").value,
+                };
+                console.log("Form submitted:", formData);
+                alert("Form submitted! Check console for data.");
+            });
+
+            clearBtn.addEventListener("click", () => {
+                [
+                    "firstName",
+                    "lastName",
+                    "email",
+                    "phone",
+                    "department",
+                    "priority",
+                    "message",
+                ].forEach((id) => {
+                    document.getElementById(id).value = "";
+                });
+            });
+
+            // Allow Enter key to connect
+            clientSecretInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    toggleConnection();
+                }
+            });
+        </script>
+    </body>
+</html>
