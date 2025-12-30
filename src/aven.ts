@@ -19,7 +19,16 @@ import type {
     UIActionType,
     D2SnapOptions,
     UIConfig,
+    AvenVoice,
 } from "./types";
+import {
+    LANGUAGE_NAMES,
+    LANGUAGE_GREETINGS,
+    SUPPORTED_TRANSCRIPTION_LANGUAGES,
+    getLanguageName,
+    getLanguageGreeting,
+    isTranscriptionSupported,
+} from "./languages";
 
 // Re-export types
 export type {
@@ -35,55 +44,17 @@ export type {
     UIActionType,
     D2SnapOptions,
     UIConfig,
+    AvenVoice,
 };
 
-// ============================================================================
-// Language Code Mapping
-// ============================================================================
-
-const LANGUAGE_NAMES: Record<string, string> = {
-    en: "English",
-    hi: "Hindi",
-    es: "Spanish",
-    fr: "French",
-    de: "German",
-    it: "Italian",
-    pt: "Portuguese",
-    ru: "Russian",
-    ja: "Japanese",
-    ko: "Korean",
-    zh: "Chinese",
-    ar: "Arabic",
-    bn: "Bengali",
-    pa: "Punjabi",
-    ta: "Tamil",
-    te: "Telugu",
-    mr: "Marathi",
-    gu: "Gujarati",
-    kn: "Kannada",
-    ml: "Malayalam",
-    th: "Thai",
-    vi: "Vietnamese",
-    id: "Indonesian",
-    ms: "Malay",
-    tr: "Turkish",
-    pl: "Polish",
-    nl: "Dutch",
-    sv: "Swedish",
-    da: "Danish",
-    no: "Norwegian",
-    fi: "Finnish",
-    cs: "Czech",
-    sk: "Slovak",
-    hu: "Hungarian",
-    ro: "Romanian",
-    bg: "Bulgarian",
-    uk: "Ukrainian",
-    el: "Greek",
-    he: "Hebrew",
-    fa: "Persian",
-    ur: "Urdu",
-    sw: "Swahili",
+// Re-export language utilities
+export {
+    LANGUAGE_NAMES,
+    LANGUAGE_GREETINGS,
+    SUPPORTED_TRANSCRIPTION_LANGUAGES,
+    getLanguageName,
+    getLanguageGreeting,
+    isTranscriptionSupported,
 };
 
 // ============================================================================
@@ -92,6 +63,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
 
 const DEFAULT_CONFIG = {
     model: "gpt-4o-realtime-preview",
+    voice: "alloy" as const,
     language: "en",
     autoGreet: true,
     greetingMessage: "Hello!",
@@ -193,6 +165,7 @@ export class Aven {
             clientSecret: config.clientSecret,
             agent: config.agent,
             model: config.model ?? DEFAULT_CONFIG.model,
+            voice: config.voice ?? DEFAULT_CONFIG.voice,
             language: config.language ?? DEFAULT_CONFIG.language,
             autoGreet: config.autoGreet ?? DEFAULT_CONFIG.autoGreet,
             greetingMessage:
@@ -217,10 +190,12 @@ export class Aven {
             name: this.config.agent.name,
             instructions,
             tools,
+            voice: this.config.voice,
         });
 
         this.log("Aven initialized with config:", {
             model: this.config.model,
+            voice: this.config.voice,
             language: this.config.language,
             uiEnabled: this.config.ui.enabled,
         });
@@ -239,7 +214,7 @@ IMPORTANT:
 - Always provide outputText with a natural language explanation of what you're doing
 - Provide outputCode with valid JavaScript that will execute the action
 - The code will be executed in the browser context with access to document and all DOM APIs
-- Use the element IDs from the UI context to target elements`,
+- Use the element IDs or selectors from the UI context to target elements`,
             parameters: z.object({
                 outputText: z
                     .string()
@@ -329,7 +304,7 @@ IMPORTANT:
         const lang = this.config.language;
 
         // Always add a language directive to ensure consistent language
-        const languageName = this.getLanguageName(lang || "en");
+        const languageName = getLanguageName(lang || "en");
         return `IMPORTANT: You MUST speak and respond ONLY in ${languageName}. All your responses should be in ${languageName}. If the user speaks in any other language, still respond in ${languageName}.`;
     }
 
@@ -362,10 +337,6 @@ You have access to the current UI state of the page. When the user asks you to i
 
 IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try to describe actions in plain text.
 `;
-    }
-
-    private getLanguageName(code: string): string {
-        return LANGUAGE_NAMES[code] || code;
     }
 
     // ========================================================================
@@ -522,8 +493,25 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
             this._error = null;
 
             // Create session with the agent
+            // Only pass language to transcription if it's supported by OpenAI's API
+            const transcriptionConfig = isTranscriptionSupported(
+                this.config.language
+            )
+                ? {
+                      inputAudioTranscription: {
+                          model: "gpt-4o-mini-transcribe" as const,
+                          language: this.config.language,
+                      },
+                  }
+                : {
+                      inputAudioTranscription: {
+                          model: "gpt-4o-mini-transcribe" as const,
+                      },
+                  };
+
             this.session = new RealtimeSession(this.agent, {
                 model: this.config.model,
+                config: transcriptionConfig,
             });
 
             // Set up event listeners
@@ -549,11 +537,21 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
             // Send greeting if configured (include UI context in greeting)
             if (this.config.autoGreet) {
                 this.log("Sending greeting message");
-                let greeting = this.config.greetingMessage;
+
+                // Get language-specific greeting or use configured greeting
+                const langGreeting = getLanguageGreeting(this.config.language);
+                const languageName = getLanguageName(this.config.language);
+
+                // Build greeting with language reinforcement
+                let greeting =
+                    this.config.greetingMessage ===
+                    DEFAULT_CONFIG.greetingMessage
+                        ? `[IMPORTANT: Respond in ${languageName} only. Say your greeting in ${languageName}.]\n\n${langGreeting}`
+                        : `[IMPORTANT: Respond in ${languageName} only.]\n\n${this.config.greetingMessage}`;
 
                 // Include DOM context with the greeting so AI has UI awareness
                 if (this.config.ui.enabled && this._currentDOM) {
-                    greeting = `${greeting}\n\n[Current UI state for reference - do not read this aloud, just use it to understand the page:]\\n\`\`\`html\\n${this._currentDOM}\\n\`\`\``;
+                    greeting = `${greeting}\n\n[Current UI state for reference - do not read this aloud, just use it to understand the page:]\n\`\`\`html\n${this._currentDOM}\n\`\`\``;
                 }
 
                 this.session.sendMessage(greeting);

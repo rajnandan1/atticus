@@ -19,4 +19,14 @@ export type {
     D2SnapOptions,
     UIConfig,
     AgentConfig,
+    AvenVoice,
 } from "./types";
+
+export {
+    LANGUAGE_NAMES,
+    LANGUAGE_GREETINGS,
+    SUPPORTED_TRANSCRIPTION_LANGUAGES,
+    getLanguageName,
+    getLanguageGreeting,
+    isTranscriptionSupported,
+} from "./languages";

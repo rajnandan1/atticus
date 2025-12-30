@@ -63,6 +63,20 @@ export interface UIConfig {
 }
 
 /**
+ * Available voice options for the agent.
+ * These are OpenAI's text-to-speech voices.
+ */
+export type AvenVoice =
+    | "alloy"
+    | "ash"
+    | "ballad"
+    | "coral"
+    | "echo"
+    | "sage"
+    | "shimmer"
+    | "verse";
+
+/**
  * Configuration options for Aven Voice Agent.
  */
 export interface AvenConfig {
@@ -78,6 +92,13 @@ export interface AvenConfig {
      * Configuration for the AI agent.
      */
     agent: AgentConfig;
+
+    /**
+     * The voice to use for the agent's speech.
+     * Available voices: 'alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse'
+     * @default 'alloy'
+     */
+    voice?: AvenVoice;
 
     /**
      * The language for the voice conversation.

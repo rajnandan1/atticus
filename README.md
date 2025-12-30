@@ -28,6 +28,8 @@ const clientSecret = await fetchClientSecret();
 
 const agent = new Aven({
     clientSecret,
+    voice: "shimmer", // Optional: alloy, ash, ballad, coral, echo, sage, shimmer, verse
+    language: "en", // Optional: supports 40+ languages
     agent: {
         name: "Assistant",
         instructions: "You are a helpful assistant.",
@@ -110,6 +112,10 @@ interface AvenConfig {
         instructions: string;
     };
 
+    // Optional: Voice for the agent (default: 'alloy')
+    // Options: 'alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse'
+    voice?: AvenVoice;
+
     // Optional: Language code (default: 'en')
     // Supports: en, es, fr, de, it, pt, ru, ja, ko, zh, hi, ar, and 30+ more
     language?: string;
@@ -120,7 +126,7 @@ interface AvenConfig {
     // Optional: Auto-greet on connect (default: true)
     autoGreet?: boolean;
 
-    // Optional: Greeting message (default: 'Hello!')
+    // Optional: Greeting message (default: language-specific greeting)
     greetingMessage?: string;
 
     // Optional: Debug logging (default: false)
@@ -142,6 +148,42 @@ interface AvenConfig {
     };
 }
 ```
+
+## Voice Options
+
+| Voice     | Description                 |
+| --------- | --------------------------- |
+| `alloy`   | Neutral, balanced (default) |
+| `ash`     | Soft, gentle                |
+| `ballad`  | Warm, expressive            |
+| `coral`   | Clear, friendly             |
+| `echo`    | Smooth, conversational      |
+| `sage`    | Calm, wise                  |
+| `shimmer` | Bright, energetic           |
+| `verse`   | Articulate, professional    |
+
+## Supported Languages
+
+Aven supports 40+ languages with native greetings. Set the `language` option:
+
+```typescript
+const agent = new Aven({
+    clientSecret,
+    language: "hi", // Hindi - will greet with "नमस्ते!"
+    agent: { name: "Assistant", instructions: "..." },
+});
+```
+
+| Code | Language   | Code | Language | Code | Language  |
+| ---- | ---------- | ---- | -------- | ---- | --------- |
+| `en` | English    | `ja` | Japanese | `pl` | Polish    |
+| `hi` | Hindi      | `ko` | Korean   | `nl` | Dutch     |
+| `es` | Spanish    | `zh` | Chinese  | `sv` | Swedish   |
+| `fr` | French     | `ar` | Arabic   | `da` | Danish    |
+| `de` | German     | `bn` | Bengali  | `no` | Norwegian |
+| `it` | Italian    | `ta` | Tamil    | `fi` | Finnish   |
+| `pt` | Portuguese | `te` | Telugu   | `tr` | Turkish   |
+| `ru` | Russian    | `th` | Thai     | `uk` | Ukrainian |
 
 ## Events
 
@@ -262,13 +304,10 @@ cd aven
 # Install dependencies
 npm install
 
-# Build the library
-npm run build
+# Start dev server (builds + serves demo)
+npm run dev
 
-# Serve the demo
-npx serve . -p 3333
-
-# Open http://localhost:3333/demo/
+# Open http://localhost:3000/demo/
 ```
 
 ## License

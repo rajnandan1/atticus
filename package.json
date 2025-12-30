@@ -18,9 +18,9 @@
     ],
     "scripts": {
         "build": "tsup",
-        "dev": "tsup --watch",
+        "dev": "tsup --watch --onSuccess \"npm run demo\"",
         "typecheck": "tsc --noEmit",
-        "demo": "serve demo"
+        "demo": "serve ."
     },
     "keywords": [
         "voice",
@@ -39,6 +39,7 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "serve": "^14.2.4",
         "tsup": "^8.5.0",
         "typescript": "^5.8.3"
     }
