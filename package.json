@@ -1,5 +1,5 @@
 {
-    "name": "aven",
+    "name": "@rajnandan1/aven",
     "version": "0.1.0",
     "description": "A framework-agnostic voice agent library for voice-controlled UI interactions",
     "type": "module",
