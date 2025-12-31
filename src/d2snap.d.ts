@@ -3,6 +3,8 @@ declare module "@webfuse-com/d2snap" {
     export interface D2SnapOptions {
         assignUniqueIDs?: boolean;
         debug?: boolean;
+        skipMarkdownTranslation?: boolean;
+        keepUnknownElements?: boolean;
     }
 
     export interface Snapshot {
@@ -11,7 +13,7 @@ declare module "@webfuse-com/d2snap" {
     }
 
     export function adaptiveD2Snap(
-        html: string,
+        element: Dom | Element | string,
         maxTokens: number,
         maxIterations?: number,
         options?: D2SnapOptions

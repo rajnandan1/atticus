@@ -858,9 +858,8 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
 
     private async captureDOM(element: Element): Promise<string | null> {
         try {
-            const html = element.innerHTML;
             const result = await adaptiveD2Snap(
-                html,
+                element,
                 this.config.ui.d2SnapOptions.maxTokens,
                 5,
                 {
