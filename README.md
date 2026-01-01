@@ -15,7 +15,7 @@ A framework-agnostic voice agent library for voice-controlled UI interactions, p
 ## Installation
 
 ```bash
-npm install atticus
+npm install @rajnandan1/atticus
 ```
 
 ## Quick Start
@@ -192,11 +192,11 @@ const agent = new Atticus({
 | `connected`               | -                   | Successfully connected                                        |
 | `disconnected`            | -                   | Disconnected                                                  |
 | `error`                   | `string`            | Error occurred                                                |
-| `statusChange`            | `AtticusStatus`        | Connection status changed                                     |
+| `statusChange`            | `AtticusStatus`     | Connection status changed                                     |
 | `conversationStateChange` | `ConversationState` | Conversation state changed                                    |
 | `message`                 | `Message`           | New message received                                          |
 | `historyChange`           | `Message[]`         | Conversation history updated                                  |
-| `stateChange`             | `AtticusState`         | Any state changed                                             |
+| `stateChange`             | `AtticusState`      | Any state changed                                             |
 | `agentStart`              | -                   | Agent started speaking                                        |
 | `agentEnd`                | -                   | Agent stopped speaking                                        |
 | `userAudio`               | -                   | User audio detected                                           |
