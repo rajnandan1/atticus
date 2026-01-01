@@ -1,6 +1,6 @@
 {
     "name": "@rajnandan1/atticus",
-    "version": "0.1.1",
+    "version": "1.0.0",
     "description": "A framework-agnostic voice agent library for voice-controlled UI interactions",
     "type": "module",
     "main": "./dist/index.cjs",
