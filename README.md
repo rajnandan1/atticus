@@ -1,4 +1,4 @@
-# Aven
+# Atticus
 
 A framework-agnostic voice agent library for voice-controlled UI interactions, powered by OpenAI's Realtime API.
 
@@ -15,18 +15,18 @@ A framework-agnostic voice agent library for voice-controlled UI interactions, p
 ## Installation
 
 ```bash
-npm install aven
+npm install atticus
 ```
 
 ## Quick Start
 
 ```typescript
-import { Aven } from "aven";
+import { Atticus } from "atticus";
 
 // Get a client secret from your backend (which calls OpenAI's API)
 const clientSecret = await fetchClientSecret();
 
-const agent = new Aven({
+const agent = new Atticus({
     clientSecret,
     voice: "shimmer", // Optional: alloy, ash, ballad, coral, echo, sage, shimmer, verse
     language: "en", // Optional: supports 40+ languages
@@ -53,7 +53,7 @@ agent.disconnect();
 Enable UI awareness to let users control your interface with voice. Actions are **automatically executed** by default:
 
 ```typescript
-const agent = new Aven({
+const agent = new Atticus({
     clientSecret,
     agent: {
         name: "UI Assistant",
@@ -83,7 +83,7 @@ await agent.connect();
 If you want to handle actions yourself:
 
 ```typescript
-const agent = new Aven({
+const agent = new Atticus({
     clientSecret,
     agent: { name: "Assistant", instructions: "..." },
     doNotExecuteActions: true, // Disable auto-execution
@@ -102,7 +102,7 @@ agent.on("action", async (action) => {
 ## Configuration
 
 ```typescript
-interface AvenConfig {
+interface AtticusConfig {
     // Required: OpenAI client secret (ephemeral key)
     clientSecret: string;
 
@@ -114,7 +114,7 @@ interface AvenConfig {
 
     // Optional: Voice for the agent (default: 'alloy')
     // Options: 'alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse'
-    voice?: AvenVoice;
+    voice?: AtticusVoice;
 
     // Optional: Language code (default: 'en')
     // Supports: en, es, fr, de, it, pt, ru, ja, ko, zh, hi, ar, and 30+ more
@@ -164,10 +164,10 @@ interface AvenConfig {
 
 ## Supported Languages
 
-Aven supports 40+ languages with native greetings. Set the `language` option:
+Atticus supports 40+ languages with native greetings. Set the `language` option:
 
 ```typescript
-const agent = new Aven({
+const agent = new Atticus({
     clientSecret,
     language: "hi", // Hindi - will greet with "नमस्ते!"
     agent: { name: "Assistant", instructions: "..." },
@@ -192,11 +192,11 @@ const agent = new Aven({
 | `connected`               | -                   | Successfully connected                                        |
 | `disconnected`            | -                   | Disconnected                                                  |
 | `error`                   | `string`            | Error occurred                                                |
-| `statusChange`            | `AvenStatus`        | Connection status changed                                     |
+| `statusChange`            | `AtticusStatus`        | Connection status changed                                     |
 | `conversationStateChange` | `ConversationState` | Conversation state changed                                    |
 | `message`                 | `Message`           | New message received                                          |
 | `historyChange`           | `Message[]`         | Conversation history updated                                  |
-| `stateChange`             | `AvenState`         | Any state changed                                             |
+| `stateChange`             | `AtticusState`         | Any state changed                                             |
 | `agentStart`              | -                   | Agent started speaking                                        |
 | `agentEnd`                | -                   | Agent stopped speaking                                        |
 | `userAudio`               | -                   | User audio detected                                           |
@@ -291,15 +291,15 @@ async function fetchClientSecret() {
 }
 
 const clientSecret = await fetchClientSecret();
-const agent = new Aven({ clientSecret, ... });
+const agent = new Atticus({ clientSecret, ... });
 ```
 
 ## Running the Demo
 
 ```bash
 # Clone the repo
-git clone https://github.com/aspect-labs/aven.git
-cd aven
+git clone https://github.com/aspect-labs/atticus.git
+cd atticus
 
 # Install dependencies
 npm install

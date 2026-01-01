@@ -1,25 +1,25 @@
 /**
- * Aven - A framework-agnostic voice agent library for voice-controlled UI interactions
+ * Atticus - A framework-agnostic voice agent library for voice-controlled UI interactions
  *
  * @packageDocumentation
  */
 
-export { Aven } from "./aven";
+export { Atticus } from "./atticus";
 export type {
-    AvenConfig,
-    AvenStatus,
+    AtticusConfig,
+    AtticusStatus,
     ConversationState,
-    AvenState,
+    AtticusState,
     Message,
     MessageContent,
-    AvenEvents,
-    AvenEventName,
+    AtticusEvents,
+    AtticusEventName,
     UIAction,
     UIActionType,
     D2SnapOptions,
     UIConfig,
     AgentConfig,
-    AvenVoice,
+    AtticusVoice,
 } from "./types";
 
 export {

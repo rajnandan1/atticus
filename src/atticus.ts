@@ -7,19 +7,19 @@ import {
 import { z } from "zod";
 import { adaptiveD2Snap } from "@webfuse-com/d2snap";
 import type {
-    AvenConfig,
-    AvenStatus,
+    AtticusConfig,
+    AtticusStatus,
     ConversationState,
-    AvenState,
+    AtticusState,
     Message,
     MessageContent,
-    AvenEvents,
-    AvenEventName,
+    AtticusEvents,
+    AtticusEventName,
     UIAction,
     UIActionType,
     D2SnapOptions,
     UIConfig,
-    AvenVoice,
+    AtticusVoice,
 } from "./types";
 import {
     LANGUAGE_NAMES,
@@ -32,19 +32,19 @@ import {
 
 // Re-export types
 export type {
-    AvenConfig,
-    AvenStatus,
+    AtticusConfig,
+    AtticusStatus,
     ConversationState,
-    AvenState,
+    AtticusState,
     Message,
     MessageContent,
-    AvenEvents,
-    AvenEventName,
+    AtticusEvents,
+    AtticusEventName,
     UIAction,
     UIActionType,
     D2SnapOptions,
     UIConfig,
-    AvenVoice,
+    AtticusVoice,
 };
 
 // Re-export language utilities
@@ -82,17 +82,17 @@ const DEFAULT_UI_CONFIG = {
 } as const;
 
 // ============================================================================
-// Aven Class
+// Atticus Class
 // ============================================================================
 
 /**
- * Aven - A framework-agnostic voice agent for voice-controlled UI interactions.
+ * Atticus - A framework-agnostic voice agent for voice-controlled UI interactions.
  *
  * @example
  * ```ts
- * import { Aven } from 'aven';
+ * import { Atticus } from 'atticus';
  *
- * const agent = new Aven({
+ * const agent = new Atticus({
  *   clientSecret: 'ek_...',
  *   agent: {
  *     name: 'Assistant',
@@ -106,9 +106,9 @@ const DEFAULT_UI_CONFIG = {
  * await agent.connect();
  * ```
  */
-export class Aven {
+export class Atticus {
     private config: Required<
-        Omit<AvenConfig, "ui"> & {
+        Omit<AtticusConfig, "ui"> & {
             ui: Required<UIConfig> & { d2SnapOptions: Required<D2SnapOptions> };
         }
     >;
@@ -117,7 +117,7 @@ export class Aven {
     private listeners: Map<string, Set<Function>> = new Map();
 
     // State
-    private _status: AvenStatus = "idle";
+    private _status: AtticusStatus = "idle";
     private _conversationState: ConversationState = "idle";
     private _error: string | null = null;
     private _history: Message[] = [];
@@ -129,11 +129,11 @@ export class Aven {
     private _autoUpdateTimer: ReturnType<typeof setInterval> | null = null;
 
     /**
-     * Create a new Aven instance.
+     * Create a new Atticus instance.
      *
      * @param config - Configuration options
      */
-    constructor(config: AvenConfig) {
+    constructor(config: AtticusConfig) {
         // Merge with defaults
         const uiConfig = config.ui
             ? {
@@ -182,8 +182,10 @@ export class Aven {
         // Build complete instructions
         const instructions = this.buildInstructions();
 
-        // Create UI action tool if UI is enabled
-        const tools = this.config.ui.enabled ? [this.createUIActionTool()] : [];
+        // Create UI tools if UI is enabled
+        const tools = this.config.ui.enabled
+            ? [this.createGetUIStateTool(), this.createUIActionTool()]
+            : [];
 
         // Create the RealtimeAgent
         this.agent = new RealtimeAgent({
@@ -202,10 +204,34 @@ export class Aven {
     }
 
     // ========================================================================
-    // UI Action Tool
+    // UI Tools
     // ========================================================================
 
+    private createGetUIStateTool() {
+        const self = this;
+        return tool({
+            name: "get_ui_state",
+            description: `Get the current state of the user interface. ALWAYS call this tool FIRST before executing any UI action to see what elements are available on the page. This returns the current HTML structure with element IDs that you can use to interact with the page.`,
+            parameters: z.object({
+                reason: z
+                    .string()
+                    .describe("Brief reason for checking UI state"),
+            }),
+            execute: async (params) => {
+                // Refresh DOM to get latest state
+                if (self.config.ui.enabled && self.config.ui.rootElement) {
+                    await self.refreshDOM();
+                }
+
+                self.log("UI state requested:", params.reason);
+
+                return `[Current UI state:]\n\`\`\`html\n${self._currentDOM}\n\`\`\``;
+            },
+        });
+    }
+
     private createUIActionTool() {
+        const self = this;
         return tool({
             name: "execute_ui_action",
             description: `Execute a UI action on the page. Use this tool whenever the user asks you to interact with the UI (click buttons, fill forms, scroll, etc.). 
@@ -214,7 +240,8 @@ IMPORTANT:
 - Always provide outputText with a natural language explanation of what you're doing
 - Provide outputCode with valid JavaScript that will execute the action
 - The code will be executed in the browser context with access to document and all DOM APIs
-- Use the element IDs or selectors from the UI context to target elements`,
+- Use the element IDs or selectors from the UI context to target elements
+- The current UI state will be provided when you call this tool`,
             parameters: z.object({
                 outputText: z
                     .string()
@@ -251,8 +278,13 @@ IMPORTANT:
                     .describe("The type of UI action being performed"),
             }),
             execute: async (params) => {
+                // Refresh DOM before executing action to get latest state
+                if (self.config.ui.enabled && self.config.ui.rootElement) {
+                    await self.refreshDOM();
+                }
+
                 const action: UIAction = {
-                    id: `action_${++this._actionIdCounter}`,
+                    id: `action_${++self._actionIdCounter}`,
                     outputText: params.outputText,
                     outputCode: params.outputCode,
                     actionDescription: params.actionDescription,
@@ -261,16 +293,20 @@ IMPORTANT:
                     timestamp: new Date(),
                 };
 
-                this.log("UI Action requested:", action);
-                this.emit("action", action);
+                self.log("UI Action requested:", action);
+                self.emit("action", action);
 
                 // Auto-execute the action unless doNotExecuteActions is true
-                if (!this.config.doNotExecuteActions && action.outputCode) {
-                    const result = await this.executeAction(action);
+                if (!self.config.doNotExecuteActions && action.outputCode) {
+                    const result = await self.executeAction(action);
                     if (result.success) {
-                        this.log("Action auto-executed successfully");
+                        self.log("Action auto-executed successfully");
+                        // Refresh DOM after action to capture changes
+                        await self.refreshDOM();
+                        return `${params.outputText}\n\n[Action executed successfully. Current UI state:]\n${self._currentDOM}`;
                     } else {
-                        this.log("Action auto-execution failed:", result.error);
+                        self.log("Action auto-execution failed:", result.error);
+                        return `${params.outputText}\n\n[Action failed: ${result.error}]`;
                     }
                 }
 
@@ -312,21 +348,31 @@ IMPORTANT:
         return `
 ## UI Interaction Capabilities
 
-You have access to the current UI state of the page. When the user asks you to interact with the UI:
+You are a voice-controlled UI assistant. You can SEE and CONTROL the user interface directly. 
+YOU perform actions ON BEHALF of the user - NEVER ask the user to click or type themselves.
 
-1. Use the \`execute_ui_action\` tool to perform UI actions
-2. Always provide a natural \`outputText\` explaining what you're doing
-3. Provide \`outputCode\` with valid JavaScript to execute the action
-4. The code runs in browser context with full DOM access
+### YOUR ROLE:
+- You ARE the user's hands - you click buttons, fill forms, navigate pages FOR them
+- When user says "click that button" or "fill in my email" - YOU do it immediately using your tools
+- NEVER say "please click on..." or "you can click..." - instead say "I'll click that for you" or "Let me fill that in"
+- After performing an action, confirm what you did: "Done! I've clicked the submit button"
 
-### Available Actions:
+### CRITICAL: Always Follow This Order
+1. **FIRST**: Call \`get_ui_state\` to see the current page elements
+2. **THEN**: Use \`execute_ui_action\` to perform the action yourself
+
+### Available Tools:
+- **get_ui_state**: See current UI elements and their IDs
+- **execute_ui_action**: Execute UI actions (click, type, scroll, etc.) - USE THIS to do things for the user
+
+### Action Types:
 - **click**: Click buttons, links, or any clickable element
-- **type**: Enter text into input fields (use element.value = 'text' or element.focus() then simulate typing)
+- **type**: Enter text into input fields (use element.value = 'text')
 - **scroll**: Scroll the page or specific elements
 - **focus**: Focus on form elements
 - **select**: Select options from dropdowns
 - **navigate**: Navigate to different pages or sections
-- **read**: Read and report information from the UI (no code needed)
+- **read**: Read and report information from the UI
 
 ### Code Examples:
 - Click: \`document.getElementById('btn').click()\`
@@ -335,7 +381,7 @@ You have access to the current UI state of the page. When the user asks you to i
 - Focus: \`document.getElementById('field').focus()\`
 - Select: \`document.getElementById('select').value = 'option1'\`
 
-IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try to describe actions in plain text.
+REMEMBER: You are the one who performs actions. Never instruct the user to do something you can do yourself.
 `;
     }
 
@@ -350,7 +396,7 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
      * @param callback - The callback function
      * @returns A function to unsubscribe
      */
-    on<T extends AvenEventName>(event: T, callback: AvenEvents[T]): () => void {
+    on<T extends AtticusEventName>(event: T, callback: AtticusEvents[T]): () => void {
         if (!this.listeners.has(event)) {
             this.listeners.set(event, new Set());
         }
@@ -366,14 +412,14 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
      * @param callback - The callback function
      * @returns A function to unsubscribe
      */
-    once<T extends AvenEventName>(
+    once<T extends AtticusEventName>(
         event: T,
-        callback: AvenEvents[T]
+        callback: AtticusEvents[T]
     ): () => void {
         const wrappedCallback = ((...args: any[]) => {
-            this.off(event, wrappedCallback as AvenEvents[T]);
+            this.off(event, wrappedCallback as AtticusEvents[T]);
             (callback as Function)(...args);
-        }) as AvenEvents[T];
+        }) as AtticusEvents[T];
 
         return this.on(event, wrappedCallback);
     }
@@ -384,7 +430,7 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
      * @param event - The event name
      * @param callback - The callback function to remove
      */
-    off<T extends AvenEventName>(event: T, callback: AvenEvents[T]): void {
+    off<T extends AtticusEventName>(event: T, callback: AtticusEvents[T]): void {
         const listeners = this.listeners.get(event);
         if (listeners) {
             listeners.delete(callback);
@@ -405,7 +451,7 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
     /**
      * Get the current connection status.
      */
-    get status(): AvenStatus {
+    get status(): AtticusStatus {
         return this._status;
     }
 
@@ -461,7 +507,7 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
     /**
      * Get the complete current state as a single object.
      */
-    getState(): AvenState {
+    getState(): AtticusState {
         return {
             status: this._status,
             conversationState: this._conversationState,
@@ -735,14 +781,26 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
 
         this.session.on("agent_start", () => {
             this.log("Agent started speaking");
-            this.setConversationState("ai_speaking");
             this.emit("agentStart");
         });
 
         this.session.on("agent_end", () => {
-            this.log("Agent stopped speaking");
-            this.setConversationState("user_turn");
+            this.log("Agent response generation ended");
             this.emit("agentEnd");
+        });
+
+        // Use audio_start for when AI audio playback begins
+        this.session.on("audio_start", () => {
+            this.log("Audio playback started");
+            this.setConversationState("ai_speaking");
+            this.emit("audioStart");
+        });
+
+        // Use audio_stopped for when AI audio playback ends - this is when we switch to user_turn
+        this.session.on("audio_stopped", () => {
+            this.log("Audio playback stopped");
+            this.setConversationState("user_turn");
+            this.emit("audioEnd");
         });
 
         this.session.on("audio", () => {
@@ -806,7 +864,7 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
         this.emitStateChange();
     }
 
-    private setStatus(status: AvenStatus): void {
+    private setStatus(status: AtticusStatus): void {
         if (this._status !== status) {
             this._status = status;
             this.emit("statusChange", status);
@@ -830,9 +888,9 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
         this.emit("stateChange", this.getState());
     }
 
-    private emit<T extends AvenEventName>(
+    private emit<T extends AtticusEventName>(
         event: T,
-        ...args: Parameters<AvenEvents[T]>
+        ...args: Parameters<AtticusEvents[T]>
     ): void {
         const listeners = this.listeners.get(event);
         if (listeners) {
@@ -848,7 +906,7 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
 
     private log(...args: unknown[]): void {
         if (this.config.debug) {
-            console.log("[Aven]", ...args);
+            console.log("[Atticus]", ...args);
         }
     }
 
@@ -881,9 +939,9 @@ IMPORTANT: Always use the execute_ui_action tool for UI interactions. Do not try
             return;
         }
 
-        // Store DOM context - it will be included when user speaks
-        // Don't send as a message that triggers a response
-        this.log("DOM context updated (stored for next interaction)");
+        // Just store DOM context - don't send as message to avoid triggering response
+        // The DOM context is included in tool execution and initial greeting
+        this.log("DOM context updated (stored for tool context)");
     }
 
     // ========================================================================

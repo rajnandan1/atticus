@@ -66,7 +66,7 @@ export interface UIConfig {
  * Available voice options for the agent.
  * These are OpenAI's text-to-speech voices.
  */
-export type AvenVoice =
+export type AtticusVoice =
     | "alloy"
     | "ash"
     | "ballad"
@@ -77,9 +77,9 @@ export type AvenVoice =
     | "verse";
 
 /**
- * Configuration options for Aven Voice Agent.
+ * Configuration options for Atticus Voice Agent.
  */
-export interface AvenConfig {
+export interface AtticusConfig {
     /**
      * The OpenAI client secret (ephemeral key) for the Realtime API.
      * Obtain this from your backend server.
@@ -98,7 +98,7 @@ export interface AvenConfig {
      * Available voices: 'alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse'
      * @default 'alloy'
      */
-    voice?: AvenVoice;
+    voice?: AtticusVoice;
 
     /**
      * The language for the voice conversation.
@@ -162,7 +162,7 @@ export interface AvenConfig {
  * - `connected`: Successfully connected and ready for conversation
  * - `error`: Connection failed or encountered an error
  */
-export type AvenStatus = "idle" | "connecting" | "connected" | "error";
+export type AtticusStatus = "idle" | "connecting" | "connected" | "error";
 
 /**
  * The current state of the conversation.
@@ -181,9 +181,9 @@ export type ConversationState =
 /**
  * The complete state of the voice agent at any given moment.
  */
-export interface AvenState {
+export interface AtticusState {
     /** Current connection status */
-    status: AvenStatus;
+    status: AtticusStatus;
     /** Current conversation state */
     conversationState: ConversationState;
     /** Error message if status is 'error', null otherwise */
@@ -269,16 +269,16 @@ export type UIActionType =
 // ============================================================================
 
 /**
- * All events emitted by Aven.
+ * All events emitted by Atticus.
  *
- * Subscribe to these events using `aven.on(eventName, callback)`.
+ * Subscribe to these events using `atticus.on(eventName, callback)`.
  */
-export interface AvenEvents {
+export interface AtticusEvents {
     /**
      * Emitted when the connection status changes.
      * @param status - The new status
      */
-    statusChange: (status: AvenStatus) => void;
+    statusChange: (status: AtticusStatus) => void;
 
     /**
      * Emitted when the conversation state changes.
@@ -309,7 +309,7 @@ export interface AvenEvents {
      * Useful for frameworks that want a single state object.
      * @param state - The complete current state
      */
-    stateChange: (state: AvenState) => void;
+    stateChange: (state: AtticusState) => void;
 
     /**
      * Emitted when the agent starts speaking.
@@ -317,9 +317,20 @@ export interface AvenEvents {
     agentStart: () => void;
 
     /**
-     * Emitted when the agent stops speaking.
+     * Emitted when the agent stops speaking (response generation ended).
      */
     agentEnd: () => void;
+
+    /**
+     * Emitted when audio playback starts.
+     */
+    audioStart: () => void;
+
+    /**
+     * Emitted when audio playback ends.
+     * This is when the user can start speaking.
+     */
+    audioEnd: () => void;
 
     /**
      * Emitted when user audio is detected.
@@ -345,6 +356,6 @@ export interface AvenEvents {
 }
 
 /**
- * Event names for Aven.
+ * Event names for Atticus.
  */
-export type AvenEventName = keyof AvenEvents;
+export type AtticusEventName = keyof AtticusEvents;
