@@ -328,12 +328,34 @@ IMPORTANT:
             instructions = `${languageDirective}\n\n${instructions}`;
         }
 
+        // Add gender directive based on voice
+        const genderDirective = this.getGenderDirective();
+        if (genderDirective) {
+            instructions = `${genderDirective}\n\n${instructions}`;
+        }
+
         // Add UI directive if enabled
         if (this.config.ui.enabled) {
             instructions = `${instructions}\n\n${this.getUIDirective()}`;
         }
 
         return instructions;
+    }
+
+    private getGenderDirective(): string | null {
+        const voice = this.config.voice;
+
+        // Map voices to genders
+        const femaleVoices = ["alloy", "coral", "sage", "shimmer"];
+        const maleVoices = ["ash", "ballad", "echo", "verse"];
+
+        if (femaleVoices.includes(voice)) {
+            return `IMPORTANT: You are a female assistant. Speak and present yourself as female.`;
+        } else if (maleVoices.includes(voice)) {
+            return `IMPORTANT: You are a male assistant. Speak and present yourself as male.`;
+        }
+
+        return null;
     }
 
     private getLanguageDirective(): string | null {
@@ -396,7 +418,10 @@ REMEMBER: You are the one who performs actions. Never instruct the user to do so
      * @param callback - The callback function
      * @returns A function to unsubscribe
      */
-    on<T extends AtticusEventName>(event: T, callback: AtticusEvents[T]): () => void {
+    on<T extends AtticusEventName>(
+        event: T,
+        callback: AtticusEvents[T]
+    ): () => void {
         if (!this.listeners.has(event)) {
             this.listeners.set(event, new Set());
         }
@@ -430,7 +455,10 @@ REMEMBER: You are the one who performs actions. Never instruct the user to do so
      * @param event - The event name
      * @param callback - The callback function to remove
      */
-    off<T extends AtticusEventName>(event: T, callback: AtticusEvents[T]): void {
+    off<T extends AtticusEventName>(
+        event: T,
+        callback: AtticusEvents[T]
+    ): void {
         const listeners = this.listeners.get(event);
         if (listeners) {
             listeners.delete(callback);
