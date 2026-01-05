@@ -20,8 +20,6 @@ export interface AgentConfig {
 export interface D2SnapOptions {
     /** Maximum tokens for adaptive compression @default 4096 */
     maxTokens?: number;
-    /** Assign unique IDs to interactive elements @default true */
-    assignUniqueIDs?: boolean;
 }
 
 /**

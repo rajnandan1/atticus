@@ -77,7 +77,6 @@ const DEFAULT_UI_CONFIG = {
     autoUpdateInterval: 5000,
     d2SnapOptions: {
         maxTokens: 4096,
-        assignUniqueIDs: true,
     },
 } as const;
 
@@ -148,9 +147,6 @@ export class Atticus {
                       maxTokens:
                           config.ui.d2SnapOptions?.maxTokens ??
                           DEFAULT_UI_CONFIG.d2SnapOptions.maxTokens,
-                      assignUniqueIDs:
-                          config.ui.d2SnapOptions?.assignUniqueIDs ??
-                          DEFAULT_UI_CONFIG.d2SnapOptions.assignUniqueIDs,
                   },
               }
             : {
@@ -396,12 +392,18 @@ YOU perform actions ON BEHALF of the user - NEVER ask the user to click or type 
 - **navigate**: Navigate to different pages or sections
 - **read**: Read and report information from the UI
 
+### Element Selection (IMPORTANT):
+Elements have a \`data-uid\` attribute (e.g., \`data-uid="36"\`) that uniquely identifies them.
+- **ALWAYS prefer** using \`document.querySelector('[data-uid="NUMBER"]')\` to select elements
+- Only fall back to other selectors (id, class, etc.) if \`data-uid\` is not present
+
 ### Code Examples:
-- Click: \`document.getElementById('btn').click()\`
-- Type: \`document.getElementById('input').value = 'Hello'\`
+- Click: \`document.querySelector('[data-uid="36"]').click()\`
+- Type: \`document.querySelector('[data-uid="42"]').value = 'Hello'\`
 - Scroll: \`window.scrollTo(0, 500)\`
-- Focus: \`document.getElementById('field').focus()\`
-- Select: \`document.getElementById('select').value = 'option1'\`
+- Focus: \`document.querySelector('[data-uid="15"]').focus()\`
+- Select: \`document.querySelector('[data-uid="28"]').value = 'option1'\`
+- Fallback (no data-uid): \`document.getElementById('btn').click()\`
 
 REMEMBER: You are the one who performs actions. Never instruct the user to do something you can do yourself.
 `;
@@ -949,8 +951,7 @@ REMEMBER: You are the one who performs actions. Never instruct the user to do so
                 this.config.ui.d2SnapOptions.maxTokens,
                 5,
                 {
-                    assignUniqueIDs:
-                        this.config.ui.d2SnapOptions.assignUniqueIDs,
+                    assignUniqueIDs: true,
                     debug: this.config.debug,
                 }
             );
