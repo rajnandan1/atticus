@@ -32,8 +32,16 @@
         "voice-control",
         "speech"
     ],
-    "author": "",
+    "author": "Raj Nandan",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rajnandan1/atticus.git"
+    },
+    "bugs": {
+        "url": "https://github.com/rajnandan1/atticus/issues"
+    },
+    "homepage": "https://github.com/rajnandan1/atticus#readme",
     "dependencies": {
         "@openai/agents": "^0.3.7",
         "turndown": "^7.2.0",

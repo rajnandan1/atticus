@@ -14,9 +14,26 @@ A framework-agnostic voice agent library for voice-controlled UI interactions, p
 
 ## Installation
 
+### npm/yarn
+
 ```bash
 npm install @rajnandan1/atticus
 ```
+
+### CDN (Vanilla HTML/JS)
+
+```html
+<!-- Use the IIFE build via unpkg or jsdelivr -->
+<script src="https://unpkg.com/@rajnandan1/atticus@latest/dist/index.global.js"></script>
+
+<!-- Or specific version -->
+<script src="https://unpkg.com/@rajnandan1/atticus@v1.1.3/dist/index.global.js"></script>
+
+<!-- jsdelivr alternative -->
+<script src="https://cdn.jsdelivr.net/npm/@rajnandan1/atticus@latest/dist/index.global.js"></script>
+```
+
+The script tag exposes `Atticus` globally - see [Vanilla HTML Usage](#vanilla-htmljs-usage) below.
 
 ## Quick Start
 
@@ -47,6 +64,69 @@ await agent.connect();
 // Disconnect when done
 agent.disconnect();
 ```
+
+## Vanilla HTML/JS Usage
+
+Atticus works perfectly with vanilla HTML/JS using a script tag:
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Atticus Voice Demo</title>
+    </head>
+    <body>
+        <button id="connectBtn">Connect</button>
+        <div id="status">Idle</div>
+
+        <!-- Include Atticus -->
+        <script src="https://unpkg.com/@rajnandan1/atticus@latest/dist/index.global.js"></script>
+
+        <script>
+            // Atticus is now available globally
+            let agent = null;
+
+            document
+                .getElementById("connectBtn")
+                .addEventListener("click", async () => {
+                    if (agent && agent.isConnected) {
+                        agent.disconnect();
+                        return;
+                    }
+
+                    // Get client secret from your backend
+                    const response = await fetch("/api/session", {
+                        method: "POST",
+                    });
+                    const { clientSecret } = await response.json();
+
+                    agent = new Atticus.Atticus({
+                        clientSecret,
+                        agent: {
+                            name: "Assistant",
+                            instructions: "You are a helpful voice assistant.",
+                        },
+                        voice: "shimmer",
+                        language: "en",
+                    });
+
+                    agent.on("connected", () => {
+                        document.getElementById("status").textContent =
+                            "Connected!";
+                    });
+
+                    agent.on("message", (msg) => {
+                        console.log("Message:", msg);
+                    });
+
+                    await agent.connect();
+                });
+        </script>
+    </body>
+</html>
+```
+
+See [demo/vanilla.html](demo/vanilla.html) for a complete example.
 
 ## UI-Aware Mode
 
@@ -249,18 +329,42 @@ When UI mode is enabled, the agent can perform these actions:
 
 ## Getting a Client Secret
 
-The client secret (ephemeral key) must be obtained from your backend. Here's an example:
+The client secret (ephemeral key) must be obtained from OpenAI's API. You can get it directly via curl or from your backend.
 
-### Backend (Node.js/Express)
+### Option 1: Direct curl (for testing)
+
+```bash
+curl -X POST "https://api.openai.com/v1/realtime/sessions" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o-realtime-preview-2024-12-17",
+    "voice": "shimmer"
+  }'
+```
+
+Response:
+
+```json
+{
+    "id": "sess_xxx",
+    "object": "realtime.session",
+    "model": "gpt-4o-realtime-preview-2024-12-17",
+    "client_secret": {
+        "value": "ek_xxx...",
+        "expires_at": 1234567890
+    }
+}
+```
+
+Copy the `client_secret.value` and use it with Atticus.
+
+### Option 2: Backend (Node.js/Express) - Recommended for Production
 
 ```typescript
-import OpenAI from "openai";
-
-const openai = new OpenAI();
-
 app.post("/api/session", async (req, res) => {
     const response = await fetch(
-        "https://api.openai.com/v1/realtime/client_secrets",
+        "https://api.openai.com/v1/realtime/sessions",
         {
             method: "POST",
             headers: {
@@ -268,10 +372,8 @@ app.post("/api/session", async (req, res) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                session: {
-                    type: "realtime",
-                    model: "gpt-4o-realtime-preview",
-                },
+                model: "gpt-4o-realtime-preview-2024-12-17",
+                voice: "shimmer",
             }),
         }
     );

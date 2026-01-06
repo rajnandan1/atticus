@@ -3,160 +3,49 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Aven Demo - Voice-Controlled Form</title>
+        <title>Atticus Demo - Voice-Controlled UI</title>
+        <!-- Bulma CSS -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+        />
+        <!-- Font Awesome for icons -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        />
         <style>
-            * {
-                box-sizing: border-box;
-            }
-
             body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                    Roboto, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 2rem;
-                background: #f5f5f5;
+                background-color: #191919;
+                min-height: 100vh;
             }
-
-            h1 {
-                color: #333;
-                margin-bottom: 0.5rem;
+            .hero {
+                background: linear-gradient(135deg, #eadb66 0%, #a26c4b 100%);
             }
-
-            .subtitle {
-                color: #666;
-                margin-bottom: 2rem;
-            }
-
             .card {
-                background: white;
                 border-radius: 12px;
-                padding: 1.5rem;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                margin-bottom: 1.5rem;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             }
-
-            .card h2 {
-                margin-top: 0;
-                color: #333;
-                font-size: 1.2rem;
-            }
-
-            /* Connection Section */
-            .connection-section {
-                display: flex;
-                gap: 1rem;
-                align-items: flex-end;
-                flex-wrap: wrap;
-            }
-
-            .input-group {
-                flex: 1;
-                min-width: 250px;
-            }
-
-            .input-group label {
-                display: block;
-                margin-bottom: 0.5rem;
-                font-weight: 500;
-                color: #555;
-            }
-
-            .input-group input {
-                width: 100%;
-                padding: 0.75rem;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                font-size: 0.9rem;
-            }
-
-            .btn {
-                padding: 0.75rem 1.5rem;
-                border: none;
-                border-radius: 8px;
-                font-size: 1rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-
-            .btn-primary {
-                background: #4f46e5;
-                color: white;
-            }
-
-            .btn-primary:hover {
-                background: #4338ca;
-            }
-
-            .btn-primary:disabled {
-                background: #9ca3af;
-                cursor: not-allowed;
-            }
-
-            .btn-danger {
-                background: #ef4444;
-                color: white;
-            }
-
-            .btn-danger:hover {
-                background: #dc2626;
-            }
-
-            /* Status Indicator */
-            .status {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.5rem 1rem;
-                border-radius: 20px;
-                font-size: 0.9rem;
-                font-weight: 500;
-            }
-
             .status-dot {
-                width: 10px;
-                height: 10px;
+                width: 12px;
+                height: 12px;
                 border-radius: 50%;
+                display: inline-block;
+                margin-right: 8px;
             }
-
-            .status.idle {
-                background: #f3f4f6;
-                color: #6b7280;
+            .status-dot.idle {
+                background-color: #b5b5b5;
             }
-
-            .status.idle .status-dot {
-                background: #9ca3af;
-            }
-
-            .status.connecting {
-                background: #fef3c7;
-                color: #d97706;
-            }
-
-            .status.connecting .status-dot {
-                background: #f59e0b;
+            .status-dot.connecting {
+                background-color: #ffdd57;
                 animation: pulse 1s infinite;
             }
-
-            .status.connected {
-                background: #d1fae5;
-                color: #059669;
+            .status-dot.connected {
+                background-color: #48c78e;
             }
-
-            .status.connected .status-dot {
-                background: #10b981;
+            .status-dot.error {
+                background-color: #f14668;
             }
-
-            .status.error {
-                background: #fee2e2;
-                color: #dc2626;
-            }
-
-            .status.error .status-dot {
-                background: #ef4444;
-            }
-
             @keyframes pulse {
                 0%,
                 100% {
@@ -166,93 +55,34 @@
                     opacity: 0.5;
                 }
             }
-
-            /* Form Section */
-            .form-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-
-            .form-grid .full-width {
-                grid-column: 1 / -1;
-            }
-
-            .form-field {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .form-field label {
-                margin-bottom: 0.5rem;
-                font-weight: 500;
-                color: #555;
-            }
-
-            .form-field input,
-            .form-field select,
-            .form-field textarea {
-                padding: 0.75rem;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                font-size: 0.95rem;
-                transition: border-color 0.2s;
-            }
-
-            .form-field input:focus,
-            .form-field select:focus,
-            .form-field textarea:focus {
-                outline: none;
-                border-color: #4f46e5;
-            }
-
-            .form-field textarea {
-                resize: vertical;
-                min-height: 100px;
-            }
-
-            /* Conversation Section */
-            .conversation {
+            .conversation-box {
                 max-height: 300px;
                 overflow-y: auto;
-                border: 1px solid #eee;
+                background: #fafafa;
                 border-radius: 8px;
                 padding: 1rem;
-                background: #fafafa;
             }
-
             .message {
                 margin-bottom: 1rem;
                 padding: 0.75rem 1rem;
                 border-radius: 12px;
                 max-width: 85%;
             }
-
             .message.user {
-                background: #4f46e5;
+                background: #667eea;
                 color: white;
                 margin-left: auto;
             }
-
             .message.assistant {
-                background: #e5e7eb;
-                color: #333;
+                background: #e8e8e8;
+                color: #363636;
             }
-
             .message .role {
                 font-size: 0.75rem;
                 font-weight: 600;
                 margin-bottom: 0.25rem;
                 opacity: 0.8;
             }
-
-            .no-messages {
-                text-align: center;
-                color: #999;
-                font-style: italic;
-            }
-
-            /* Action Log */
             .action-log {
                 max-height: 200px;
                 overflow-y: auto;
@@ -263,66 +93,40 @@
                 padding: 1rem;
                 border-radius: 8px;
             }
-
             .action-entry {
                 margin-bottom: 0.75rem;
                 padding-bottom: 0.75rem;
                 border-bottom: 1px solid #333;
             }
-
             .action-entry:last-child {
                 border-bottom: none;
-                margin-bottom: 0;
-                padding-bottom: 0;
             }
-
             .action-text {
                 color: #9cdcfe;
             }
-
             .action-code {
                 color: #ce9178;
                 margin-top: 0.25rem;
             }
-
             .action-result {
                 color: #6a9955;
                 margin-top: 0.25rem;
             }
-
             .action-error {
                 color: #f44747;
             }
-
-            /* Speaking Indicator */
-            .speaking-indicator {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.5rem 1rem;
-                background: #eef2ff;
-                border-radius: 8px;
-                margin-bottom: 1rem;
-            }
-
-            .speaking-indicator.hidden {
-                display: none;
-            }
-
             .speaking-bars {
                 display: flex;
-                gap: 2px;
+                gap: 3px;
                 align-items: center;
             }
-
             .speaking-bar {
-                width: 3px;
-                height: 12px;
-                background: #4f46e5;
+                width: 4px;
+                height: 16px;
+                background: #667eea;
                 border-radius: 2px;
                 animation: speaking 0.5s ease-in-out infinite;
             }
-
             .speaking-bar:nth-child(2) {
                 animation-delay: 0.1s;
             }
@@ -332,7 +136,6 @@
             .speaking-bar:nth-child(4) {
                 animation-delay: 0.3s;
             }
-
             @keyframes speaking {
                 0%,
                 100% {
@@ -342,287 +145,497 @@
                     transform: scaleY(1);
                 }
             }
-
-            /* Responsive */
-            @media (max-width: 600px) {
-                .form-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .connection-section {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
+            pre.curl-example {
+                background: #2d2d2d;
+                color: #f8f8f2;
+                padding: 1rem;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-size: 0.85rem;
             }
         </style>
     </head>
     <body>
-        <h1>🎙️ Aven Demo</h1>
-        <p class="subtitle">
-            Voice-controlled form filling powered by OpenAI Realtime API
-        </p>
-
-        <!-- Connection Card -->
-        <div class="card">
-            <h2>Connection</h2>
-            <div class="connection-section">
-                <div class="input-group">
-                    <label for="clientSecret"
-                        >Client Secret (Ephemeral Key)</label
-                    >
-                    <input
-                        type="password"
-                        id="clientSecret"
-                        placeholder="ek_..."
-                        value=""
-                    />
-                </div>
-                <div class="input-group" style="min-width: 150px; flex: 0.5">
-                    <label for="language">Language</label>
-                    <select
-                        id="language"
-                        style="
-                            width: 100%;
-                            padding: 0.75rem;
-                            border: 1px solid #ddd;
-                            border-radius: 8px;
-                            font-size: 0.9rem;
-                        "
-                    >
-                        <option value="en">English</option>
-                        <option value="hi">Hindi</option>
-                        <option value="es">Spanish</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="it">Italian</option>
-                        <option value="pt">Portuguese</option>
-                        <option value="ru">Russian</option>
-                        <option value="ja">Japanese</option>
-                        <option value="ko">Korean</option>
-                        <option value="zh">Chinese</option>
-                        <option value="ar">Arabic</option>
-                        <option value="bn">Bengali</option>
-                        <option value="pa">Punjabi</option>
-                        <option value="ta">Tamil</option>
-                        <option value="te">Telugu</option>
-                        <option value="mr">Marathi</option>
-                        <option value="gu">Gujarati</option>
-                        <option value="kn">Kannada</option>
-                        <option value="ml">Malayalam</option>
-                        <option value="th">Thai</option>
-                        <option value="vi">Vietnamese</option>
-                        <option value="id">Indonesian</option>
-                        <option value="ms">Malay</option>
-                        <option value="tr">Turkish</option>
-                        <option value="pl">Polish</option>
-                        <option value="nl">Dutch</option>
-                        <option value="sv">Swedish</option>
-                        <option value="da">Danish</option>
-                        <option value="no">Norwegian</option>
-                        <option value="fi">Finnish</option>
-                        <option value="cs">Czech</option>
-                        <option value="sk">Slovak</option>
-                        <option value="hu">Hungarian</option>
-                        <option value="ro">Romanian</option>
-                        <option value="bg">Bulgarian</option>
-                        <option value="uk">Ukrainian</option>
-                        <option value="el">Greek</option>
-                        <option value="he">Hebrew</option>
-                        <option value="fa">Persian</option>
-                        <option value="ur">Urdu</option>
-                        <option value="sw">Swahili</option>
-                    </select>
-                </div>
-                <div class="input-group" style="min-width: 120px; flex: 0.4">
-                    <label for="voice">Voice</label>
-                    <select
-                        id="voice"
-                        style="
-                            width: 100%;
-                            padding: 0.75rem;
-                            border: 1px solid #ddd;
-                            border-radius: 8px;
-                            font-size: 0.9rem;
-                        "
-                    >
-                        <option value="alloy">Alloy (Neutral)</option>
-                        <option value="ash">Ash (Soft)</option>
-                        <option value="ballad">Ballad (Warm)</option>
-                        <option value="coral">Coral (Clear)</option>
-                        <option value="echo">Echo (Smooth)</option>
-                        <option value="sage">Sage (Calm)</option>
-                        <option value="shimmer">Shimmer (Bright)</option>
-                        <option value="verse">Verse (Articulate)</option>
-                    </select>
-                </div>
-                <button id="connectBtn" class="btn btn-primary">Connect</button>
-            </div>
-            <div
-                style="
-                    margin-top: 1rem;
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                "
-            >
-                <span class="status idle" id="statusIndicator">
-                    <span class="status-dot"></span>
-                    <span id="statusText">Idle</span>
-                </span>
-                <span
-                    id="speakingState"
-                    style="color: #666; font-size: 0.9rem"
-                ></span>
-            </div>
-        </div>
-
-        <!-- Form Card (UI Target) -->
-        <div class="card" id="formContainer">
-            <h2>📝 Contact Form</h2>
-            <p style="color: #666; margin-bottom: 1rem">
-                Try saying: "Fill the name field with John Doe" or "Set the
-                email to john@example.com"
-            </p>
-
-            <div class="form-grid">
-                <div class="form-field">
-                    <label for="firstName">First Name</label>
-                    <input
-                        type="text"
-                        id="firstName"
-                        placeholder="Enter first name"
-                    />
-                </div>
-
-                <div class="form-field">
-                    <label for="lastName">Last Name</label>
-                    <input
-                        type="text"
-                        id="lastName"
-                        placeholder="Enter last name"
-                    />
-                </div>
-
-                <div class="form-field">
-                    <label for="email">Email Address</label>
-                    <input
-                        type="email"
-                        id="email"
-                        placeholder="Enter email address"
-                    />
-                </div>
-
-                <div class="form-field">
-                    <label for="phone">Phone Number</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        placeholder="Enter phone number"
-                    />
-                </div>
-
-                <div class="form-field">
-                    <label for="department">Department</label>
-                    <select id="department">
-                        <option value="">Select department...</option>
-                        <option value="sales">Sales</option>
-                        <option value="support">Support</option>
-                        <option value="engineering">Engineering</option>
-                        <option value="marketing">Marketing</option>
-                    </select>
-                </div>
-
-                <div class="form-field">
-                    <label for="priority">Priority</label>
-                    <select id="priority">
-                        <option value="">Select priority...</option>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
-                    </select>
-                </div>
-
-                <div class="form-field full-width">
-                    <label for="message">Message</label>
-                    <textarea
-                        id="message"
-                        placeholder="Enter your message..."
-                    ></textarea>
-                </div>
-
-                <div class="full-width" style="display: flex; gap: 1rem">
-                    <button
-                        type="button"
-                        id="submitBtn"
-                        class="btn btn-primary"
-                    >
-                        Submit Form
-                    </button>
-                    <button
-                        type="button"
-                        id="clearBtn"
-                        class="btn"
-                        style="background: #e5e7eb; color: #333"
-                    >
-                        Clear Form
-                    </button>
+        <!-- Hero Section -->
+        <section class="hero is-primary is-small">
+            <div class="hero-body">
+                <div class="container">
+                    <h1 class="title">
+                        <i class="fas fa-microphone"></i> Atticus Demo
+                    </h1>
+                    <p class="subtitle">
+                        Voice-controlled UI powered by OpenAI Realtime API
+                    </p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Conversation Card -->
-        <div class="card">
-            <h2>💬 Conversation</h2>
-            <div id="speakingIndicator" class="speaking-indicator hidden">
-                <div class="speaking-bars">
-                    <div class="speaking-bar"></div>
-                    <div class="speaking-bar"></div>
-                    <div class="speaking-bar"></div>
-                    <div class="speaking-bar"></div>
+        <section class="section">
+            <div class="container">
+                <div class="columns">
+                    <!-- Left Column: Connection & Form -->
+                    <div class="column is-7">
+                        <!-- Connection Card -->
+                        <div class="card mb-5">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    <i class="fas fa-plug mr-2"></i> Connection
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div class="field">
+                                    <label class="label"
+                                        >Client Secret (Ephemeral Key)</label
+                                    >
+                                    <div class="control has-icons-left">
+                                        <input
+                                            class="input"
+                                            type="password"
+                                            id="clientSecret"
+                                            placeholder="ek_..."
+                                        />
+                                        <span class="icon is-left">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                    </div>
+                                    <p class="help">
+                                        Get this from OpenAI API - see curl
+                                        example below
+                                    </p>
+                                </div>
+
+                                <div class="columns">
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label"
+                                                >Language</label
+                                            >
+                                            <div class="control">
+                                                <div
+                                                    class="select is-fullwidth"
+                                                >
+                                                    <select id="language">
+                                                        <option value="en">
+                                                            English
+                                                        </option>
+                                                        <option value="hi">
+                                                            Hindi
+                                                        </option>
+                                                        <option value="es">
+                                                            Spanish
+                                                        </option>
+                                                        <option value="fr">
+                                                            French
+                                                        </option>
+                                                        <option value="de">
+                                                            German
+                                                        </option>
+                                                        <option value="it">
+                                                            Italian
+                                                        </option>
+                                                        <option value="pt">
+                                                            Portuguese
+                                                        </option>
+                                                        <option value="ru">
+                                                            Russian
+                                                        </option>
+                                                        <option value="ja">
+                                                            Japanese
+                                                        </option>
+                                                        <option value="ko">
+                                                            Korean
+                                                        </option>
+                                                        <option value="zh">
+                                                            Chinese
+                                                        </option>
+                                                        <option value="ar">
+                                                            Arabic
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label">Voice</label>
+                                            <div class="control">
+                                                <div
+                                                    class="select is-fullwidth"
+                                                >
+                                                    <select id="voice">
+                                                        <option value="alloy">
+                                                            Alloy (Neutral)
+                                                        </option>
+                                                        <option value="ash">
+                                                            Ash (Soft)
+                                                        </option>
+                                                        <option value="ballad">
+                                                            Ballad (Warm)
+                                                        </option>
+                                                        <option value="coral">
+                                                            Coral (Clear)
+                                                        </option>
+                                                        <option value="echo">
+                                                            Echo (Smooth)
+                                                        </option>
+                                                        <option value="sage">
+                                                            Sage (Calm)
+                                                        </option>
+                                                        <option
+                                                            value="shimmer"
+                                                            selected
+                                                        >
+                                                            Shimmer (Bright)
+                                                        </option>
+                                                        <option value="verse">
+                                                            Verse (Articulate)
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="control">
+                                        <button
+                                            id="connectBtn"
+                                            class="button is-primary is-medium is-fullwidth"
+                                        >
+                                            <span class="icon">
+                                                <i class="fas fa-play"></i>
+                                            </span>
+                                            <span>Connect</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="level mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <span
+                                                class="tag is-medium"
+                                                id="statusTag"
+                                            >
+                                                <span
+                                                    class="status-dot idle"
+                                                    id="statusDot"
+                                                ></span>
+                                                <span id="statusText"
+                                                    >Idle</span
+                                                >
+                                            </span>
+                                        </div>
+                                        <div class="level-item">
+                                            <span
+                                                id="speakingState"
+                                                class="has-text-grey"
+                                            ></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Card -->
+                        <div class="card" id="formContainer">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    <i class="fas fa-edit mr-2"></i> Contact
+                                    Form
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <p class="mb-4 has-text-grey">
+                                    Try saying: "Fill the first name with John"
+                                    or "Set email to john@example.com"
+                                </p>
+
+                                <div class="columns">
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label"
+                                                >First Name</label
+                                            >
+                                            <div class="control">
+                                                <input
+                                                    class="input"
+                                                    type="text"
+                                                    id="firstName"
+                                                    placeholder="John"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label"
+                                                >Last Name</label
+                                            >
+                                            <div class="control">
+                                                <input
+                                                    class="input"
+                                                    type="text"
+                                                    id="lastName"
+                                                    placeholder="Doe"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="columns">
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label">Email</label>
+                                            <div class="control has-icons-left">
+                                                <input
+                                                    class="input"
+                                                    type="email"
+                                                    id="email"
+                                                    placeholder="john@example.com"
+                                                />
+                                                <span class="icon is-left">
+                                                    <i
+                                                        class="fas fa-envelope"
+                                                    ></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label">Phone</label>
+                                            <div class="control has-icons-left">
+                                                <input
+                                                    class="input"
+                                                    type="tel"
+                                                    id="phone"
+                                                    placeholder="+1 234 567 8900"
+                                                />
+                                                <span class="icon is-left">
+                                                    <i class="fas fa-phone"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="columns">
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label"
+                                                >Department</label
+                                            >
+                                            <div class="control">
+                                                <div
+                                                    class="select is-fullwidth"
+                                                >
+                                                    <select id="department">
+                                                        <option value="">
+                                                            Select department...
+                                                        </option>
+                                                        <option value="sales">
+                                                            Sales
+                                                        </option>
+                                                        <option value="support">
+                                                            Support
+                                                        </option>
+                                                        <option
+                                                            value="engineering"
+                                                        >
+                                                            Engineering
+                                                        </option>
+                                                        <option
+                                                            value="marketing"
+                                                        >
+                                                            Marketing
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column">
+                                        <div class="field">
+                                            <label class="label"
+                                                >Priority</label
+                                            >
+                                            <div class="control">
+                                                <div
+                                                    class="select is-fullwidth"
+                                                >
+                                                    <select id="priority">
+                                                        <option value="">
+                                                            Select priority...
+                                                        </option>
+                                                        <option value="low">
+                                                            Low
+                                                        </option>
+                                                        <option value="medium">
+                                                            Medium
+                                                        </option>
+                                                        <option value="high">
+                                                            High
+                                                        </option>
+                                                        <option value="urgent">
+                                                            Urgent
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Message</label>
+                                    <div class="control">
+                                        <textarea
+                                            class="textarea"
+                                            id="message"
+                                            placeholder="Enter your message..."
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="field is-grouped">
+                                    <div class="control">
+                                        <button
+                                            id="submitBtn"
+                                            class="button is-primary"
+                                        >
+                                            <span class="icon"
+                                                ><i
+                                                    class="fas fa-paper-plane"
+                                                ></i
+                                            ></span>
+                                            <span>Submit</span>
+                                        </button>
+                                    </div>
+                                    <div class="control">
+                                        <button
+                                            id="clearBtn"
+                                            class="button is-light"
+                                        >
+                                            <span class="icon"
+                                                ><i class="fas fa-eraser"></i
+                                            ></span>
+                                            <span>Clear</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Conversation & Actions -->
+                    <div class="column is-5">
+                        <!-- Conversation Card -->
+                        <div class="card mb-5">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    <i class="fas fa-comments mr-2"></i>
+                                    Conversation
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div
+                                    id="speakingIndicator"
+                                    class="notification is-info is-light mb-3"
+                                    style="display: none"
+                                >
+                                    <div class="is-flex is-align-items-center">
+                                        <div class="speaking-bars mr-3">
+                                            <div class="speaking-bar"></div>
+                                            <div class="speaking-bar"></div>
+                                            <div class="speaking-bar"></div>
+                                            <div class="speaking-bar"></div>
+                                        </div>
+                                        <span id="speakingText"
+                                            >AI is speaking...</span
+                                        >
+                                    </div>
+                                </div>
+                                <div class="conversation-box" id="conversation">
+                                    <p class="has-text-grey has-text-centered">
+                                        <i
+                                            class="fas fa-comment-slash mr-2"
+                                        ></i>
+                                        No messages yet. Connect and start
+                                        talking!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Log Card -->
+                        <div class="card mb-5">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    <i class="fas fa-bolt mr-2"></i> Action Log
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div class="action-log" id="actionLog">
+                                    <span class="has-text-grey"
+                                        >UI actions will appear here...</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- How to Get Client Secret -->
+                        <div class="card">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    <i class="fas fa-terminal mr-2"></i> Get
+                                    Client Secret
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <p class="mb-3">
+                                    Run this curl command to get an ephemeral
+                                    client secret:
+                                </p>
+                                <pre class="curl-example">
+curl -X POST "https://api.openai.com/v1/realtime/sessions" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o-realtime-preview-2024-12-17",
+    "voice": "shimmer"
+  }'</pre
+                                >
+                                <p class="mt-3 has-text-grey is-size-7">
+                                    Copy the
+                                    <code>client_secret.value</code> from the
+                                    response and paste above.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <span id="speakingText">AI is speaking...</span>
             </div>
-            <div class="conversation" id="conversation">
-                <div class="no-messages">
-                    No messages yet. Connect and start talking!
-                </div>
-            </div>
-        </div>
+        </section>
 
-        <!-- Action Log Card -->
-        <div class="card">
-            <h2>⚡ Action Log</h2>
-            <div class="action-log" id="actionLog">
-                <div style="color: #666">UI actions will appear here...</div>
-            </div>
-        </div>
+        <!-- Atticus via CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/@rajnandan1/atticus@latest/dist/index.global.js"></script>
+        <!-- For local development, use: -->
+        <!-- <script src="../dist/index.global.js"></script> -->
 
-        <!-- Import Aven from dist folder -->
-        <script type="module">
-            // Global error handler
-            window.onerror = function (msg, url, line, col, error) {
-                console.error("Global error:", msg, url, line, col, error);
-                alert("Error: " + msg);
-                return false;
-            };
-            window.addEventListener("unhandledrejection", function (event) {
-                console.error("Unhandled rejection:", event.reason);
-                alert("Unhandled promise rejection: " + event.reason);
-            });
-
-            import { Aven } from "../dist/index.js";
-
-            // Make it globally available for debugging
-            window.Aven = Aven;
-            console.log("Aven loaded:", Aven);
+        <script>
+            // Atticus is available globally after loading the script
+            console.log("Atticus loaded:", Atticus);
 
             // DOM Elements
             const clientSecretInput = document.getElementById("clientSecret");
             const languageSelect = document.getElementById("language");
             const voiceSelect = document.getElementById("voice");
             const connectBtn = document.getElementById("connectBtn");
-            const statusIndicator = document.getElementById("statusIndicator");
+            const statusDot = document.getElementById("statusDot");
             const statusText = document.getElementById("statusText");
             const speakingState = document.getElementById("speakingState");
             const speakingIndicator =
@@ -634,11 +647,11 @@
             const submitBtn = document.getElementById("submitBtn");
             const clearBtn = document.getElementById("clearBtn");
 
-            let aven = null;
+            let agent = null;
 
             // Update status indicator
             function updateStatus(status) {
-                statusIndicator.className = `status ${status}`;
+                statusDot.className = "status-dot " + status;
                 const statusLabels = {
                     idle: "Idle",
                     connecting: "Connecting...",
@@ -649,20 +662,25 @@
 
                 // Update button
                 if (status === "connected") {
-                    connectBtn.textContent = "Disconnect";
-                    connectBtn.className = "btn btn-danger";
+                    connectBtn.innerHTML =
+                        '<span class="icon"><i class="fas fa-stop"></i></span><span>Disconnect</span>';
+                    connectBtn.className =
+                        "button is-danger is-medium is-fullwidth";
                     connectBtn.disabled = false;
                 } else if (status === "connecting") {
-                    connectBtn.textContent = "Connecting...";
+                    connectBtn.innerHTML =
+                        '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Connecting...</span>';
                     connectBtn.disabled = true;
                 } else {
-                    connectBtn.textContent = "Connect";
-                    connectBtn.className = "btn btn-primary";
+                    connectBtn.innerHTML =
+                        '<span class="icon"><i class="fas fa-play"></i></span><span>Connect</span>';
+                    connectBtn.className =
+                        "button is-primary is-medium is-fullwidth";
                     connectBtn.disabled = false;
                 }
             }
 
-            // Update conversation state indicator
+            // Update conversation state
             function updateConversationState(state) {
                 const stateLabels = {
                     idle: "",
@@ -672,26 +690,26 @@
                 };
                 speakingState.textContent = stateLabels[state] || "";
 
-                // Show/hide speaking indicator
                 if (state === "ai_speaking") {
-                    speakingIndicator.classList.remove("hidden");
+                    speakingIndicator.style.display = "block";
                     speakingTextEl.textContent = "AI is speaking...";
                 } else if (state === "user_speaking") {
-                    speakingIndicator.classList.remove("hidden");
+                    speakingIndicator.style.display = "block";
                     speakingTextEl.textContent = "Listening...";
                 } else {
-                    speakingIndicator.classList.add("hidden");
+                    speakingIndicator.style.display = "none";
                 }
             }
 
             // Add message to conversation
             function addMessage(message) {
-                // Remove "no messages" placeholder
-                const placeholder = conversation.querySelector(".no-messages");
-                if (placeholder) placeholder.remove();
+                // Clear placeholder
+                const placeholder =
+                    conversation.querySelector("p.has-text-grey");
+                if (placeholder) conversation.innerHTML = "";
 
                 const div = document.createElement("div");
-                div.className = `message ${message.role}`;
+                div.className = "message " + message.role;
 
                 const role = document.createElement("div");
                 role.className = "role";
@@ -699,12 +717,10 @@
                     message.role === "user" ? "You" : "Assistant";
 
                 const content = document.createElement("div");
-                if (message.content.type === "text") {
-                    content.textContent = message.content.text;
-                } else {
-                    content.textContent =
-                        message.content.transcript || "(audio)";
-                }
+                content.textContent =
+                    message.content.type === "text"
+                        ? message.content.text
+                        : message.content.transcript || "(audio)";
 
                 div.appendChild(role);
                 div.appendChild(content);
@@ -715,74 +731,66 @@
             // Log action
             function logAction(action, result) {
                 // Clear placeholder
-                if (actionLog.querySelector("div[style]")) {
-                    actionLog.innerHTML = "";
-                }
+                const placeholder =
+                    actionLog.querySelector("span.has-text-grey");
+                if (placeholder) actionLog.innerHTML = "";
 
                 const entry = document.createElement("div");
                 entry.className = "action-entry";
-
                 entry.innerHTML = `
-                <div class="action-text">📢 ${action.outputText}</div>
-                ${
-                    action.outputCode
-                        ? `<div class="action-code">⚡ ${action.outputCode}</div>`
-                        : ""
-                }
-                ${
-                    result
-                        ? `<div class="${
-                              result.success ? "action-result" : "action-error"
-                          }">
-                    ${result.success ? "✓ Success" : "✗ " + result.error}
-                </div>`
-                        : ""
-                }
-            `;
-
+                    <div class="action-text">📢 ${action.outputText}</div>
+                    ${
+                        action.outputCode
+                            ? `<div class="action-code">⚡ ${action.outputCode}</div>`
+                            : ""
+                    }
+                    ${
+                        result
+                            ? `<div class="${
+                                  result.success
+                                      ? "action-result"
+                                      : "action-error"
+                              }">
+                        ${result.success ? "✓ Success" : "✗ " + result.error}
+                    </div>`
+                            : ""
+                    }
+                `;
                 actionLog.appendChild(entry);
                 actionLog.scrollTop = actionLog.scrollHeight;
             }
 
             // Connect/disconnect
             async function toggleConnection() {
-                console.log("toggleConnection called");
-                if (aven && aven.isConnected) {
-                    aven.disconnect();
-                    aven = null;
+                if (agent && agent.isConnected) {
+                    agent.disconnect();
+                    agent = null;
                     return;
                 }
 
                 const clientSecret = clientSecretInput.value.trim();
-                console.log(
-                    "Client secret:",
-                    clientSecret ? "provided" : "empty"
-                );
                 if (!clientSecret) {
-                    alert("Please enter a client secret");
+                    alert(
+                        "Please enter a client secret. See the curl command below to get one."
+                    );
                     return;
                 }
 
-                console.log("Creating Aven instance...");
-                const selectedLanguage = languageSelect.value;
-                const selectedVoice = voiceSelect.value;
-                console.log("Selected language:", selectedLanguage);
-                console.log("Selected voice:", selectedVoice);
-                // Create Aven instance
                 try {
-                    aven = new Aven({
+                    // Create Atticus instance using global Atticus.Atticus
+                    agent = new Atticus.Atticus({
                         clientSecret,
-                        language: selectedLanguage,
-                        voice: selectedVoice,
+                        language: languageSelect.value,
+                        voice: voiceSelect.value,
                         agent: {
                             name: "Form Assistant",
                             instructions: `You are a helpful assistant that helps users fill out a contact form.
-                    
+
 The form has these fields:
 - First Name (id: firstName)
 - Last Name (id: lastName)
-- Email Address (id: email)
-- Phone Number (id: phone)
+- Email (id: email)
+- Phone (id: phone)
 - Department (id: department) - options: sales, support, engineering, marketing
 - Priority (id: priority) - options: low, medium, high, urgent
 - Message (id: message) - textarea
@@ -798,31 +806,24 @@ Be friendly and confirm what you've done.`,
                             autoUpdateInterval: 3000,
                         },
                     });
-                    console.log("Aven instance created:", aven);
-                } catch (err) {
-                    console.error("Failed to create Aven instance:", err);
-                    alert("Failed to create Aven: " + err.message);
-                    return;
-                }
 
-                // Set up event listeners
-                aven.on("statusChange", updateStatus);
-                aven.on("conversationStateChange", updateConversationState);
-                aven.on("message", addMessage);
-                aven.on("error", (err) => {
-                    console.error("Error:", err);
-                    alert("Error: " + err);
-                });
+                    // Event listeners
+                    agent.on("statusChange", updateStatus);
+                    agent.on(
+                        "conversationStateChange",
+                        updateConversationState
+                    );
+                    agent.on("message", addMessage);
+                    agent.on("error", (err) => {
+                        console.error("Error:", err);
+                        alert("Error: " + err);
+                    });
+                    agent.on("action", (action) => {
+                        console.log("Action executed:", action);
+                        logAction(action, { success: true });
+                    });
 
-                aven.on("action", (action) => {
-                    console.log("Action executed:", action);
-                    // Actions are auto-executed by default, just log them
-                    logAction(action, { success: true });
-                });
-
-                try {
-                    console.log("Calling aven.connect()...");
-                    await aven.connect();
+                    await agent.connect();
                     console.log("Connected successfully!");
                 } catch (err) {
                     console.error("Connection failed:", err);
@@ -863,9 +864,7 @@ Be friendly and confirm what you've done.`,
 
             // Allow Enter key to connect
             clientSecretInput.addEventListener("keypress", (e) => {
-                if (e.key === "Enter") {
-                    toggleConnection();
-                }
+                if (e.key === "Enter") toggleConnection();
             });
         </script>
     </body>
