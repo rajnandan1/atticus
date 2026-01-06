@@ -5,7 +5,7 @@ import {
     type RealtimeItem,
 } from "@openai/agents/realtime";
 import { z } from "zod";
-import { adaptiveD2Snap } from "@webfuse-com/d2snap";
+import { adaptiveD2Snap } from "./d2snap";
 import type {
     AtticusConfig,
     AtticusStatus,
@@ -237,7 +237,8 @@ IMPORTANT:
 - Provide outputCode with valid JavaScript that will execute the action
 - The code will be executed in the browser context with access to document and all DOM APIs
 - Use the element IDs or selectors from the UI context to target elements
-- The current UI state will be provided when you call this tool`,
+- After execution, you will receive the UPDATED UI state - use this to perform follow-up actions if needed
+- You CAN and SHOULD call this tool MULTIPLE TIMES to complete multi-step tasks (e.g., click "Show More" then select an item)`,
             parameters: z.object({
                 outputText: z
                     .string()
@@ -297,12 +298,17 @@ IMPORTANT:
                     const result = await self.executeAction(action);
                     if (result.success) {
                         self.log("Action auto-executed successfully");
+
+                        // Wait for DOM to update after action (animations, async updates, etc.)
+                        await self.waitForDOMUpdate();
+
                         // Refresh DOM after action to capture changes
                         await self.refreshDOM();
-                        return `${params.outputText}\n\n[Action executed successfully. Current UI state:]\n${self._currentDOM}`;
+
+                        return `[Action executed successfully]\n\n[UPDATED UI state after action - if you need to perform another action, you can call this tool again:]\n\`\`\`html\n${self._currentDOM}\n\`\`\``;
                     } else {
                         self.log("Action auto-execution failed:", result.error);
-                        return `${params.outputText}\n\n[Action failed: ${result.error}]`;
+                        return `[Action failed: ${result.error}]\n\nPlease try a different approach or selector.`;
                     }
                 }
 
@@ -375,20 +381,37 @@ YOU perform actions ON BEHALF of the user - NEVER ask the user to click or type 
 - NEVER say "please click on..." or "you can click..." - instead say "I'll click that for you" or "Let me fill that in"
 - After performing an action, confirm what you did: "Done! I've clicked the submit button"
 
+### CRITICAL: Multi-Step Actions
+When an element is NOT visible in the current UI state:
+1. Look for "Show More", "View All", "Expand", "Load More", or similar buttons
+2. Click that button FIRST using \`execute_ui_action\`
+3. After the action completes, you will receive the UPDATED UI state
+4. Then call \`execute_ui_action\` AGAIN to interact with the now-visible element
+
+**Example: User asks to select "Bank E" but only Banks A-D are visible**
+- Step 1: Notice Bank E is not in the UI, but there's a "Show More Banks" button
+- Step 2: Call \`execute_ui_action\` to click "Show More Banks"
+- Step 3: The response includes the updated UI with Banks E, F, G now visible
+- Step 4: Call \`execute_ui_action\` AGAIN to click on Bank E
+
+YOU CAN AND SHOULD call \`execute_ui_action\` MULTIPLE TIMES in sequence when needed!
+
 ### CRITICAL: Always Follow This Order
 1. **FIRST**: Call \`get_ui_state\` to see the current page elements
 2. **THEN**: Use \`execute_ui_action\` to perform the action yourself
+3. **IF ELEMENT NOT FOUND**: Look for expand/show more buttons and click them first
+4. **REPEAT**: Call \`execute_ui_action\` again with the newly visible elements
 
 ### Available Tools:
 - **get_ui_state**: See current UI elements and their IDs
-- **execute_ui_action**: Execute UI actions (click, type, scroll, etc.) - USE THIS to do things for the user
+- **execute_ui_action**: Execute UI actions (click, type, scroll, etc.) - USE THIS to do things for the user. Call it MULTIPLE TIMES if needed!
 
 ### Action Types:
 - **click**: Click buttons, links, or any clickable element
-- **type**: Enter text into input fields (use element.value = 'text')
+- **type**: Enter text into input fields (MUST dispatch events - see examples below)
 - **scroll**: Scroll the page or specific elements
 - **focus**: Focus on form elements
-- **select**: Select options from dropdowns
+- **select**: Select options from dropdowns (MUST dispatch events)
 - **navigate**: Navigate to different pages or sections
 - **read**: Read and report information from the UI
 
@@ -398,14 +421,61 @@ Elements have a \`data-uid\` attribute (e.g., \`data-uid="36"\`) that uniquely i
 - Only fall back to other selectors (id, class, etc.) if \`data-uid\` is not present
 
 ### Code Examples:
-- Click: \`document.querySelector('[data-uid="36"]').click()\`
-- Type: \`document.querySelector('[data-uid="42"]').value = 'Hello'\`
-- Scroll: \`window.scrollTo(0, 500)\`
-- Focus: \`document.querySelector('[data-uid="15"]').focus()\`
-- Select: \`document.querySelector('[data-uid="28"]').value = 'option1'\`
-- Fallback (no data-uid): \`document.getElementById('btn').click()\`
 
-REMEMBER: You are the one who performs actions. Never instruct the user to do something you can do yourself.
+**Click a button:**
+\`\`\`javascript
+document.querySelector('[data-uid="36"]').click()
+\`\`\`
+
+**CRITICAL - Type into an input field (MUST dispatch events for frameworks to detect changes):**
+\`\`\`javascript
+(function() {
+  const el = document.querySelector('[data-uid="42"]');
+  el.focus();
+  el.value = 'Hello';
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+})()
+\`\`\`
+
+**Select a dropdown option:**
+\`\`\`javascript
+(function() {
+  const el = document.querySelector('[data-uid="28"]');
+  el.value = 'option1';
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+})()
+\`\`\`
+
+**Check/uncheck a checkbox:**
+\`\`\`javascript
+(function() {
+  const el = document.querySelector('[data-uid="50"]');
+  el.checked = true;
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+})()
+\`\`\`
+
+**Scroll:**
+\`\`\`javascript
+window.scrollTo(0, 500)
+\`\`\`
+
+**Focus:**
+\`\`\`javascript
+document.querySelector('[data-uid="15"]').focus()
+\`\`\`
+
+### WHY DISPATCH EVENTS?
+Modern web frameworks (React, Vue, Svelte, Angular) listen for 'input' and 'change' events to update their state.
+Simply setting \`.value\` does NOT trigger these events, so buttons may stay disabled, validation won't run, etc.
+**ALWAYS dispatch 'input' and 'change' events after setting values!**
+
+REMEMBER: 
+- You are the one who performs actions. Never instruct the user to do something you can do yourself.
+- If you can't find an element, LOOK FOR WAYS TO REVEAL IT (show more, expand, scroll, etc.)
+- You CAN call tools multiple times in a row to complete complex tasks!
+- ALWAYS dispatch events after setting input values!
 `;
     }
 
@@ -587,7 +657,16 @@ REMEMBER: You are the one who performs actions. Never instruct the user to do so
 
             this.session = new RealtimeSession(this.agent, {
                 model: this.config.model,
-                config: transcriptionConfig,
+                config: {
+                    ...transcriptionConfig,
+                    // Configure turn detection for proper conversation flow
+                    turnDetection: {
+                        type: "semantic_vad",
+                        eagerness: "medium",
+                        createResponse: true,
+                        interruptResponse: true,
+                    },
+                },
             });
 
             // Set up event listeners
@@ -810,12 +889,15 @@ REMEMBER: You are the one who performs actions. Never instruct the user to do so
         });
 
         this.session.on("agent_start", () => {
-            this.log("Agent started speaking");
+            this.log("Agent started generating response");
+            this.setConversationState("ai_speaking");
             this.emit("agentStart");
         });
 
         this.session.on("agent_end", () => {
             this.log("Agent response generation ended");
+            // Set to user_turn when agent finishes - the user can now speak
+            this.setConversationState("user_turn");
             this.emit("agentEnd");
         });
 
@@ -826,15 +908,32 @@ REMEMBER: You are the one who performs actions. Never instruct the user to do so
             this.emit("audioStart");
         });
 
-        // Use audio_stopped for when AI audio playback ends - this is when we switch to user_turn
+        // Use audio_stopped for when AI audio playback ends
         this.session.on("audio_stopped", () => {
             this.log("Audio playback stopped");
-            this.setConversationState("user_turn");
+            // Only change to user_turn if we were speaking
+            if (this._conversationState === "ai_speaking") {
+                this.setConversationState("user_turn");
+            }
             this.emit("audioEnd");
         });
 
-        this.session.on("audio", () => {
+        // Handle interruptions - when user speaks over the AI
+        this.session.on("audio_interrupted", () => {
+            this.log("Audio interrupted by user");
             this.setConversationState("user_speaking");
+            this.emit("audioInterrupted");
+        });
+
+        // Listen for user audio input
+        this.session.on("audio", () => {
+            // Only set user_speaking if it's the user's turn
+            if (
+                this._conversationState === "user_turn" ||
+                this._conversationState === "idle"
+            ) {
+                this.setConversationState("user_speaking");
+            }
             this.emit("userAudio");
         });
     }
@@ -988,6 +1087,142 @@ REMEMBER: You are the one who performs actions. Never instruct the user to do so
             return message.content.text;
         }
         return message.content.transcript || "(audio)";
+    }
+
+    /**
+     * Wait for DOM to update and network to be idle after an action.
+     * Similar to Puppeteer/Playwright's networkidle behavior.
+     *
+     * @param maxWaitMs - Maximum time to wait (default 10000ms)
+     * @param networkIdleMs - Time with no network activity to consider idle (default 500ms)
+     */
+    private async waitForDOMUpdate(
+        maxWaitMs = 10000,
+        networkIdleMs = 500
+    ): Promise<void> {
+        // First, wait for next animation frame
+        await new Promise<void>((resolve) => {
+            if (typeof requestAnimationFrame !== "undefined") {
+                requestAnimationFrame(() => resolve());
+            } else {
+                setTimeout(resolve, 16);
+            }
+        });
+
+        // Then wait for network idle
+        await this.waitForNetworkIdle(maxWaitMs, networkIdleMs);
+    }
+
+    /**
+     * Wait for network to be idle (no pending fetch/XHR requests).
+     *
+     * @param maxWaitMs - Maximum time to wait
+     * @param idleMs - Time with no network activity to consider idle
+     */
+    private async waitForNetworkIdle(
+        maxWaitMs: number,
+        idleMs: number
+    ): Promise<void> {
+        // Skip if not in browser environment
+        if (typeof window === "undefined" || typeof fetch === "undefined") {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return;
+        }
+
+        return new Promise((resolve) => {
+            let pendingRequests = 0;
+            let idleTimer: ReturnType<typeof setTimeout> | null = null;
+            let maxTimer: ReturnType<typeof setTimeout>;
+            let resolved = false;
+
+            const cleanup = () => {
+                if (resolved) return;
+                resolved = true;
+                if (idleTimer) clearTimeout(idleTimer);
+                clearTimeout(maxTimer);
+                // Restore original functions
+                window.fetch = originalFetch;
+                if (originalXHROpen) {
+                    XMLHttpRequest.prototype.open = originalXHROpen;
+                }
+                resolve();
+            };
+
+            const checkIdle = () => {
+                if (idleTimer) clearTimeout(idleTimer);
+                if (pendingRequests === 0) {
+                    idleTimer = setTimeout(() => {
+                        this.log(
+                            `Network idle after ${idleMs}ms with no pending requests`
+                        );
+                        cleanup();
+                    }, idleMs);
+                }
+            };
+
+            const onRequestStart = () => {
+                pendingRequests++;
+                if (idleTimer) {
+                    clearTimeout(idleTimer);
+                    idleTimer = null;
+                }
+            };
+
+            const onRequestEnd = () => {
+                pendingRequests = Math.max(0, pendingRequests - 1);
+                checkIdle();
+            };
+
+            // Intercept fetch
+            const originalFetch = window.fetch;
+            window.fetch = ((...args: Parameters<typeof fetch>) => {
+                onRequestStart();
+                return originalFetch
+                    .apply(window, args)
+                    .then((response) => {
+                        onRequestEnd();
+                        return response;
+                    })
+                    .catch((error) => {
+                        onRequestEnd();
+                        throw error;
+                    });
+            }) as typeof fetch;
+
+            // Intercept XMLHttpRequest
+            const originalXHROpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function (
+                this: XMLHttpRequest,
+                method: string,
+                url: string | URL,
+                async?: boolean,
+                username?: string | null,
+                password?: string | null
+            ) {
+                this.addEventListener("loadend", onRequestEnd, { once: true });
+                onRequestStart();
+                // Call with all arguments, defaulting async to true if not provided
+                return originalXHROpen.call(
+                    this,
+                    method,
+                    url,
+                    async ?? true,
+                    username,
+                    password
+                );
+            };
+
+            // Set maximum wait time
+            maxTimer = setTimeout(() => {
+                this.log(
+                    `Network wait timed out after ${maxWaitMs}ms with ${pendingRequests} pending requests`
+                );
+                cleanup();
+            }, maxWaitMs);
+
+            // Start checking for idle immediately (in case no requests are made)
+            checkIdle();
+        });
     }
 
     /**

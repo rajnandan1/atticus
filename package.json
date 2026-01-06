@@ -1,6 +1,6 @@
 {
     "name": "@rajnandan1/atticus",
-    "version": "v1.1.2",
+    "version": "v1.1.3",
     "description": "A framework-agnostic voice agent library for voice-controlled UI interactions",
     "type": "module",
     "main": "./dist/index.cjs",
@@ -20,7 +20,8 @@
         "build": "tsup",
         "dev": "tsup --watch --onSuccess \"npm run demo\"",
         "typecheck": "tsc --noEmit",
-        "demo": "serve ."
+        "demo": "serve .",
+        "test:d2snap": "node --import tsx test-d2snap/test.js"
     },
     "keywords": [
         "voice",
@@ -35,12 +36,16 @@
     "license": "MIT",
     "dependencies": {
         "@openai/agents": "^0.3.7",
-        "@webfuse-com/d2snap": "github:webfuse-com/D2Snap",
+        "turndown": "^7.2.0",
+        "turndown-plugin-gfm": "^1.0.2",
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "@types/turndown": "^5.0.6",
+        "jsdom": "^27.4.0",
         "serve": "^14.2.4",
         "tsup": "^8.5.0",
+        "tsx": "^4.21.0",
         "typescript": "^5.8.3"
     }
 }

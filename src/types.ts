@@ -331,6 +331,11 @@ export interface AtticusEvents {
     audioEnd: () => void;
 
     /**
+     * Emitted when audio is interrupted by the user speaking over the AI.
+     */
+    audioInterrupted: () => void;
+
+    /**
      * Emitted when user audio is detected.
      */
     userAudio: () => void;
