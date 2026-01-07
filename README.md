@@ -41,11 +41,12 @@ const agent = new Atticus({
     language: "en", // Optional: supports 40+ languages
     agent: {
         name: "Assistant",
-        instructions: "You are a helpful assistant.",
+        instructions:
+            "You are a helpful assistant that helps users interact with the UI.",
     },
     ui: {
         enabled: true,
-        rootElement: formContainer,
+        rootElement: document.getElementById("app"),
     },
 });
 
@@ -142,7 +143,6 @@ const agent = new Atticus({
     ui: {
         enabled: true,
         rootElement: document.getElementById("app")!,
-        autoUpdate: true, // Auto-refresh DOM context
     },
 });
 
@@ -177,6 +177,52 @@ agent.on("action", async (action) => {
         console.log("Result:", result);
     }
 });
+```
+
+### Preserving Nested DOM with `data-preserve`
+
+By default, Atticus compresses the DOM to fit within token limits. To preserve specific sections with their full nested structure (useful for complex components or data that shouldn't be simplified), add the `data-preserve` attribute:
+
+```html
+<!-- This section will maintain its full nested structure -->
+<div
+    class="product-list"
+    data-preserve="List of available products with prices"
+>
+    <div class="product">
+        <h3>Product Name</h3>
+        <p>Description</p>
+        <span class="price">$99.99</span>
+        <button>Add to Cart</button>
+    </div>
+    <!-- More products... -->
+</div>
+
+<!-- Another preserved section -->
+<form data-preserve="Contact form with name, email, and message fields">
+    <input type="text" name="name" placeholder="Name" />
+    <input type="email" name="email" placeholder="Email" />
+    <textarea name="message" placeholder="Message"></textarea>
+    <button type="submit">Submit</button>
+</form>
+```
+
+The `data-preserve` attribute value should describe the content to help the AI understand what's inside. Preserved sections are included in full detail in the DOM context sent to the AI agent.
+
+```typescript
+const agent = new Atticus({
+    clientSecret,
+    agent: {
+        name: "Shopping Assistant",
+        instructions: "Help users find and add products to their cart.",
+    },
+    ui: {
+        enabled: true,
+        rootElement: document.getElementById("app"),
+    },
+});
+
+// AI will see the full product list structure and can interact with specific products
 ```
 
 ## Configuration
@@ -250,7 +296,11 @@ Atticus supports 40+ languages with native greetings. Set the `language` option:
 const agent = new Atticus({
     clientSecret,
     language: "hi", // Hindi - will greet with "नमस्ते!"
-    agent: { name: "Assistant", instructions: "..." },
+    agent: { name: "Assistant", instructions: "Help users with their tasks." },
+    ui: {
+        enabled: true,
+        rootElement: document.getElementById("app"),
+    },
 });
 ```
 
@@ -387,13 +437,22 @@ app.post("/api/session", async (req, res) => {
 
 ```typescript
 async function fetchClientSecret() {
-  const response = await fetch('/api/session', { method: 'POST' });
-  const data = await response.json();
-  return data.clientSecret;
+    const response = await fetch("/api/session", { method: "POST" });
+    const data = await response.json();
+    return data.clientSecret;
 }
 
 const clientSecret = await fetchClientSecret();
-const agent = new Atticus({ clientSecret, ... });
+const agent = new Atticus({
+    clientSecret,
+    agent: {
+        name: "Assistant",
+        instructions: "Help users interact with the page.",
+    },
+    ui: {
+        enabled: true,
+        rootElement: document.getElementById("app"),
+});
 ```
 
 ## Running the Demo
