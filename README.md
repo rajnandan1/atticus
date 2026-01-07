@@ -51,6 +51,10 @@ const agent = new Atticus({
         name: "Assistant",
         instructions: "You are a helpful assistant.",
     },
+    ui: {
+        enabled: true,
+        rootElement: formContainer,
+    },
 });
 
 // Listen to events
@@ -108,6 +112,10 @@ Atticus works perfectly with vanilla HTML/JS using a script tag:
                         },
                         voice: "shimmer",
                         language: "en",
+                        ui: {
+                            enabled: true,
+                            rootElement: document.body,
+                        },
                     });
 
                     agent.on("connected", () => {
@@ -126,7 +134,7 @@ Atticus works perfectly with vanilla HTML/JS using a script tag:
 </html>
 ```
 
-See [demo/vanilla.html](demo/vanilla.html) for a complete example.
+See [index.html](index.html) for a complete example.
 
 ## UI-Aware Mode
 
@@ -400,7 +408,7 @@ const agent = new Atticus({ clientSecret, ... });
 
 ```bash
 # Clone the repo
-git clone https://github.com/aspect-labs/atticus.git
+git clone https://github.com/rajnandan1/atticus.git
 cd atticus
 
 # Install dependencies

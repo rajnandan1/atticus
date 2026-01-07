@@ -32,7 +32,7 @@
         "voice-control",
         "speech"
     ],
-    "author": "Raj Nandan",
+    "author": "Raj Nandan Sharma <rajnandan1@gmail.com>",
     "license": "MIT",
     "repository": {
         "type": "git",
@@ -41,7 +41,7 @@
     "bugs": {
         "url": "https://github.com/rajnandan1/atticus/issues"
     },
-    "homepage": "https://github.com/rajnandan1/atticus#readme",
+    "homepage": "https://atticus.rajnandan.com",
     "dependencies": {
         "@openai/agents": "^0.3.7",
         "turndown": "^7.2.0",

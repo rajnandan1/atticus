@@ -1,0 +1,139 @@
+body {
+    background-color: #191919;
+    min-height: 100vh;
+}
+.hero {
+    background: linear-gradient(135deg, #5fceb3 0%, #5fceb3 100%);
+}
+.card {
+    border-radius: 12px;
+    box-shadow: none;
+    background-color: #151515;
+}
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+.status-dot.idle {
+    background-color: #b5b5b5;
+}
+.status-dot.connecting {
+    background-color: #ffdd57;
+    animation: pulse 1s infinite;
+}
+.status-dot.connected {
+    background-color: #48c78e;
+}
+.status-dot.error {
+    background-color: #f14668;
+}
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+.conversation-box {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.message {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    max-width: 85%;
+}
+.message.user {
+    background: #667eea;
+    color: white;
+    margin-left: auto;
+}
+.message.assistant {
+    background: #e8e8e8;
+    color: #363636;
+}
+.message .role {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    opacity: 0.8;
+}
+.action-log {
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: "Monaco", "Menlo", monospace;
+    font-size: 0.85rem;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.action-entry {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #333;
+}
+.action-entry:last-child {
+    border-bottom: none;
+}
+.action-text {
+    color: #9cdcfe;
+}
+.action-code {
+    color: #ce9178;
+    margin-top: 0.25rem;
+}
+.action-result {
+    color: #6a9955;
+    margin-top: 0.25rem;
+}
+.action-error {
+    color: #f44747;
+}
+.speaking-bars {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+.speaking-bar {
+    width: 4px;
+    height: 16px;
+    background: #667eea;
+    border-radius: 2px;
+    animation: speaking 0.5s ease-in-out infinite;
+}
+.speaking-bar:nth-child(2) {
+    animation-delay: 0.1s;
+}
+.speaking-bar:nth-child(3) {
+    animation-delay: 0.2s;
+}
+.speaking-bar:nth-child(4) {
+    animation-delay: 0.3s;
+}
+@keyframes speaking {
+    0%,
+    100% {
+        transform: scaleY(0.5);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}
+pre.curl-example {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+}
