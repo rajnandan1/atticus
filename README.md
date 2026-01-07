@@ -1,5 +1,7 @@
 # Atticus
 
+![Atticus Banner](banner.png)
+
 A framework-agnostic voice agent library for voice-controlled UI interactions, powered by OpenAI's Realtime API.
 
 ## Features
