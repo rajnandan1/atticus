@@ -4,16 +4,6 @@
 
 A framework-agnostic voice agent library for voice-controlled UI interactions, powered by OpenAI's Realtime API.
 
-## Features
-
--   🎙️ Real-time voice conversations with AI
--   🖱️ UI-aware interactions - let users control your app with voice
--   ⚡ Auto-executes UI actions (click, type, scroll, etc.)
--   🌍 Multi-language support (40+ languages)
--   📦 Framework-agnostic - works with React, Vue, Svelte, vanilla JS, etc.
--   🔧 Simple event-based API
--   🎯 DOM compression for efficient context via d2snap
-
 ## Installation
 
 ### npm/yarn
