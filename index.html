@@ -3,7 +3,49 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Atticus Demo - Voice-Controlled UI</title>
+        <title>Atticus - Voice-Controlled UI Library</title>
+        <meta
+            name="description"
+            content="A framework-agnostic voice agent library for voice-controlled UI interactions, powered by OpenAI's Realtime API. Control your web apps with voice commands."
+        />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://atticus.rajnandan.com/" />
+        <meta
+            property="og:title"
+            content="Atticus - Voice-Controlled UI Library"
+        />
+        <meta
+            property="og:description"
+            content="A framework-agnostic voice agent library for voice-controlled UI interactions, powered by OpenAI's Realtime API."
+        />
+        <meta
+            property="og:image"
+            content="https://atticus.rajnandan.com/banner.png"
+        />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://atticus.rajnandan.com/" />
+        <meta
+            property="twitter:title"
+            content="Atticus - Voice-Controlled UI Library"
+        />
+        <meta
+            property="twitter:description"
+            content="A framework-agnostic voice agent library for voice-controlled UI interactions, powered by OpenAI's Realtime API."
+        />
+        <meta
+            property="twitter:image"
+            content="https://atticus.rajnandan.com/banner.png"
+        />
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+
         <!-- Bulma CSS -->
         <link
             rel="stylesheet"
@@ -14,161 +56,80 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         />
-        <style>
-            body {
-                background-color: #191919;
-                min-height: 100vh;
-            }
-            .hero {
-                background: linear-gradient(135deg, #eadb66 0%, #a26c4b 100%);
-            }
-            .card {
-                border-radius: 12px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-            .status-dot {
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                display: inline-block;
-                margin-right: 8px;
-            }
-            .status-dot.idle {
-                background-color: #b5b5b5;
-            }
-            .status-dot.connecting {
-                background-color: #ffdd57;
-                animation: pulse 1s infinite;
-            }
-            .status-dot.connected {
-                background-color: #48c78e;
-            }
-            .status-dot.error {
-                background-color: #f14668;
-            }
-            @keyframes pulse {
-                0%,
-                100% {
-                    opacity: 1;
-                }
-                50% {
-                    opacity: 0.5;
-                }
-            }
-            .conversation-box {
-                max-height: 300px;
-                overflow-y: auto;
-                background: #fafafa;
-                border-radius: 8px;
-                padding: 1rem;
-            }
-            .message {
-                margin-bottom: 1rem;
-                padding: 0.75rem 1rem;
-                border-radius: 12px;
-                max-width: 85%;
-            }
-            .message.user {
-                background: #667eea;
-                color: white;
-                margin-left: auto;
-            }
-            .message.assistant {
-                background: #e8e8e8;
-                color: #363636;
-            }
-            .message .role {
-                font-size: 0.75rem;
-                font-weight: 600;
-                margin-bottom: 0.25rem;
-                opacity: 0.8;
-            }
-            .action-log {
-                max-height: 200px;
-                overflow-y: auto;
-                font-family: "Monaco", "Menlo", monospace;
-                font-size: 0.85rem;
-                background: #1e1e1e;
-                color: #d4d4d4;
-                padding: 1rem;
-                border-radius: 8px;
-            }
-            .action-entry {
-                margin-bottom: 0.75rem;
-                padding-bottom: 0.75rem;
-                border-bottom: 1px solid #333;
-            }
-            .action-entry:last-child {
-                border-bottom: none;
-            }
-            .action-text {
-                color: #9cdcfe;
-            }
-            .action-code {
-                color: #ce9178;
-                margin-top: 0.25rem;
-            }
-            .action-result {
-                color: #6a9955;
-                margin-top: 0.25rem;
-            }
-            .action-error {
-                color: #f44747;
-            }
-            .speaking-bars {
-                display: flex;
-                gap: 3px;
-                align-items: center;
-            }
-            .speaking-bar {
-                width: 4px;
-                height: 16px;
-                background: #667eea;
-                border-radius: 2px;
-                animation: speaking 0.5s ease-in-out infinite;
-            }
-            .speaking-bar:nth-child(2) {
-                animation-delay: 0.1s;
-            }
-            .speaking-bar:nth-child(3) {
-                animation-delay: 0.2s;
-            }
-            .speaking-bar:nth-child(4) {
-                animation-delay: 0.3s;
-            }
-            @keyframes speaking {
-                0%,
-                100% {
-                    transform: scaleY(0.5);
-                }
-                50% {
-                    transform: scaleY(1);
-                }
-            }
-            pre.curl-example {
-                background: #2d2d2d;
-                color: #f8f8f2;
-                padding: 1rem;
-                border-radius: 8px;
-                overflow-x: auto;
-                font-size: 0.85rem;
-            }
-        </style>
+        <link rel="stylesheet" href="style.css" />
+        <!-- jQuery -->
+        <script
+            src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"
+        ></script>
     </head>
     <body>
-        <!-- Hero Section -->
-        <section class="hero is-primary is-small">
-            <div class="hero-body">
-                <div class="container">
-                    <h1 class="title">
-                        <i class="fas fa-microphone"></i> Atticus Demo
-                    </h1>
-                    <p class="subtitle">
-                        Voice-controlled UI powered by OpenAI Realtime API
-                    </p>
+        <!-- Navigation -->
+        <nav
+            class="navbar"
+            style="background-color: #222"
+            role="navigation"
+            aria-label="main navigation"
+        >
+            <div class="container">
+                <div class="navbar-brand py-4">
+                    <a
+                        class="navbar-item"
+                        href="/"
+                        style="background-color: #a8df8e; border-radius: 15px"
+                    >
+                        <img
+                            src="logo.png"
+                            alt="Atticus Logo"
+                            style="height: 28px; max-height: 28px; color: #111"
+                        />
+                        <span
+                            class="ml-2 has-text-weight-bold pr-2"
+                            style="color: #111"
+                            >Atticus</span
+                        >
+                    </a>
+                    <span class="mt-3 ml-2"> Voice Controlled UI Library </span>
+                </div>
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a
+                                class="button is-light is-small"
+                                href="https://github.com/rajnandan1/atticus"
+                                target="_blank"
+                            >
+                                <span class="icon"
+                                    ><i class="fab fa-github"></i
+                                ></span>
+                                <span>GitHub</span>
+                            </a>
+                            <a
+                                class="button is-warning is-small"
+                                href="https://github.com/rajnandan1/atticus/issues/new"
+                                target="_blank"
+                            >
+                                <span class="icon"
+                                    ><i class="fas fa-bug"></i
+                                ></span>
+                                <span>Report Issue</span>
+                            </a>
+                            <a
+                                class="button is-info is-small"
+                                href="https://www.buymeacoffee.com/rajnandan1"
+                                target="_blank"
+                            >
+                                <span class="icon"
+                                    ><i class="fas fa-coffee"></i
+                                ></span>
+                                <span>Donate</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
+        </nav>
 
         <section class="section">
             <div class="container">
@@ -605,9 +566,15 @@ curl -X POST "https://api.openai.com/v1/realtime/sessions" \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o-realtime-preview-2024-12-17",
-    "voice": "shimmer"
-  }'</pre
+  "session": {
+    "type": "realtime",
+    "model": "gpt-4o-realtime-preview"
+  },
+  "expires_after": {
+      "anchor": "created_at",
+      "seconds": 7200
+    }
+}'</pre
                                 >
                                 <p class="mt-3 has-text-grey is-size-7">
                                     Copy the
@@ -624,59 +591,68 @@ curl -X POST "https://api.openai.com/v1/realtime/sessions" \
         <!-- Atticus via CDN -->
         <script src="https://cdn.jsdelivr.net/npm/@rajnandan1/atticus@latest/dist/index.global.js"></script>
         <!-- For local development, use: -->
-        <!-- <script src="../dist/index.global.js"></script> -->
+        <!-- <script src="./dist/index.global.js"></script> -->
 
         <script>
             // Atticus is available globally after loading the script
             console.log("Atticus loaded:", Atticus);
 
             // DOM Elements
-            const clientSecretInput = document.getElementById("clientSecret");
-            const languageSelect = document.getElementById("language");
-            const voiceSelect = document.getElementById("voice");
-            const connectBtn = document.getElementById("connectBtn");
-            const statusDot = document.getElementById("statusDot");
-            const statusText = document.getElementById("statusText");
-            const speakingState = document.getElementById("speakingState");
-            const speakingIndicator =
-                document.getElementById("speakingIndicator");
-            const speakingTextEl = document.getElementById("speakingText");
-            const conversation = document.getElementById("conversation");
-            const actionLog = document.getElementById("actionLog");
+            const $clientSecretInput = $("#clientSecret");
+            const $languageSelect = $("#language");
+            const $voiceSelect = $("#voice");
+            const $connectBtn = $("#connectBtn");
+            const $statusDot = $("#statusDot");
+            const $statusText = $("#statusText");
+            const $speakingState = $("#speakingState");
+            const $speakingIndicator = $("#speakingIndicator");
+            const $speakingTextEl = $("#speakingText");
+            const $conversation = $("#conversation");
+            const $actionLog = $("#actionLog");
             const formContainer = document.getElementById("formContainer");
-            const submitBtn = document.getElementById("submitBtn");
-            const clearBtn = document.getElementById("clearBtn");
+            const $submitBtn = $("#submitBtn");
+            const $clearBtn = $("#clearBtn");
 
             let agent = null;
 
             // Update status indicator
             function updateStatus(status) {
-                statusDot.className = "status-dot " + status;
+                $statusDot.attr("class", "status-dot " + status);
                 const statusLabels = {
                     idle: "Idle",
                     connecting: "Connecting...",
                     connected: "Connected",
                     error: "Error",
                 };
-                statusText.textContent = statusLabels[status] || status;
+                $statusText.text(statusLabels[status] || status);
 
                 // Update button
                 if (status === "connected") {
-                    connectBtn.innerHTML =
-                        '<span class="icon"><i class="fas fa-stop"></i></span><span>Disconnect</span>';
-                    connectBtn.className =
-                        "button is-danger is-medium is-fullwidth";
-                    connectBtn.disabled = false;
+                    $connectBtn
+                        .html(
+                            '<span class="icon"><i class="fas fa-stop"></i></span><span>Disconnect</span>'
+                        )
+                        .attr(
+                            "class",
+                            "button is-danger is-medium is-fullwidth"
+                        )
+                        .prop("disabled", false);
                 } else if (status === "connecting") {
-                    connectBtn.innerHTML =
-                        '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Connecting...</span>';
-                    connectBtn.disabled = true;
+                    $connectBtn
+                        .html(
+                            '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Connecting...</span>'
+                        )
+                        .prop("disabled", true);
                 } else {
-                    connectBtn.innerHTML =
-                        '<span class="icon"><i class="fas fa-play"></i></span><span>Connect</span>';
-                    connectBtn.className =
-                        "button is-primary is-medium is-fullwidth";
-                    connectBtn.disabled = false;
+                    $connectBtn
+                        .html(
+                            '<span class="icon"><i class="fas fa-play"></i></span><span>Connect</span>'
+                        )
+                        .attr(
+                            "class",
+                            "button is-primary is-medium is-fullwidth"
+                        )
+                        .prop("disabled", false);
                 }
             }
 
@@ -688,56 +664,50 @@ curl -X POST "https://api.openai.com/v1/realtime/sessions" \
                     user_turn: "🎤 Your turn",
                     user_speaking: "🎙️ Listening...",
                 };
-                speakingState.textContent = stateLabels[state] || "";
+                $speakingState.text(stateLabels[state] || "");
 
                 if (state === "ai_speaking") {
-                    speakingIndicator.style.display = "block";
-                    speakingTextEl.textContent = "AI is speaking...";
+                    $speakingIndicator.show();
+                    $speakingTextEl.text("AI is speaking...");
                 } else if (state === "user_speaking") {
-                    speakingIndicator.style.display = "block";
-                    speakingTextEl.textContent = "Listening...";
+                    $speakingIndicator.show();
+                    $speakingTextEl.text("Listening...");
                 } else {
-                    speakingIndicator.style.display = "none";
+                    $speakingIndicator.hide();
                 }
             }
 
             // Add message to conversation
             function addMessage(message) {
                 // Clear placeholder
-                const placeholder =
-                    conversation.querySelector("p.has-text-grey");
-                if (placeholder) conversation.innerHTML = "";
+                const $placeholder = $conversation.find("p.has-text-grey");
+                if ($placeholder.length) $conversation.empty();
 
-                const div = document.createElement("div");
-                div.className = "message " + message.role;
+                const $div = $("<div>").addClass("message " + message.role);
 
-                const role = document.createElement("div");
-                role.className = "role";
-                role.textContent =
-                    message.role === "user" ? "You" : "Assistant";
+                const $role = $("<div>")
+                    .addClass("role")
+                    .text(message.role === "user" ? "You" : "Assistant");
 
-                const content = document.createElement("div");
-                content.textContent =
+                const $content = $("<div>").text(
                     message.content.type === "text"
                         ? message.content.text
-                        : message.content.transcript || "(audio)";
+                        : message.content.transcript || "(audio)"
+                );
 
-                div.appendChild(role);
-                div.appendChild(content);
-                conversation.appendChild(div);
-                conversation.scrollTop = conversation.scrollHeight;
+                $div.append($role).append($content);
+                $conversation.append($div);
+                $conversation.scrollTop($conversation[0].scrollHeight);
             }
 
             // Log action
             function logAction(action, result) {
                 // Clear placeholder
-                const placeholder =
-                    actionLog.querySelector("span.has-text-grey");
-                if (placeholder) actionLog.innerHTML = "";
+                const $placeholder = $actionLog.find("span.has-text-grey");
+                if ($placeholder.length) $actionLog.empty();
 
-                const entry = document.createElement("div");
-                entry.className = "action-entry";
-                entry.innerHTML = `
+                const $entry = $("<div>").addClass("action-entry");
+                $entry.html(`
                     <div class="action-text">📢 ${action.outputText}</div>
                     ${
                         action.outputCode
@@ -755,9 +725,9 @@ curl -X POST "https://api.openai.com/v1/realtime/sessions" \
                     </div>`
                             : ""
                     }
-                `;
-                actionLog.appendChild(entry);
-                actionLog.scrollTop = actionLog.scrollHeight;
+                `);
+                $actionLog.append($entry);
+                $actionLog.scrollTop($actionLog[0].scrollHeight);
             }
 
             // Connect/disconnect
@@ -768,7 +738,7 @@ curl -X POST "https://api.openai.com/v1/realtime/sessions" \
                     return;
                 }
 
-                const clientSecret = clientSecretInput.value.trim();
+                const clientSecret = $clientSecretInput.val().trim();
                 if (!clientSecret) {
                     alert(
                         "Please enter a client secret. See the curl command below to get one."
@@ -780,8 +750,8 @@ curl -X POST "https://api.openai.com/v1/realtime/sessions" \
                     // Create Atticus instance using global Atticus.Atticus
                     agent = new Atticus.Atticus({
                         clientSecret,
-                        language: languageSelect.value,
-                        voice: voiceSelect.value,
+                        language: $languageSelect.val(),
+                        voice: $voiceSelect.val(),
                         agent: {
                             name: "Form Assistant",
                             instructions: `You are a helpful assistant that helps users fill out a contact form.
@@ -802,8 +772,6 @@ Be friendly and confirm what you've done.`,
                         ui: {
                             enabled: true,
                             rootElement: formContainer,
-                            autoUpdate: true,
-                            autoUpdateInterval: 3000,
                         },
                     });
 
@@ -832,23 +800,23 @@ Be friendly and confirm what you've done.`,
             }
 
             // Event listeners
-            connectBtn.addEventListener("click", toggleConnection);
+            $connectBtn.on("click", toggleConnection);
 
-            submitBtn.addEventListener("click", () => {
+            $submitBtn.on("click", () => {
                 const formData = {
-                    firstName: document.getElementById("firstName").value,
-                    lastName: document.getElementById("lastName").value,
-                    email: document.getElementById("email").value,
-                    phone: document.getElementById("phone").value,
-                    department: document.getElementById("department").value,
-                    priority: document.getElementById("priority").value,
-                    message: document.getElementById("message").value,
+                    firstName: $("#firstName").val(),
+                    lastName: $("#lastName").val(),
+                    email: $("#email").val(),
+                    phone: $("#phone").val(),
+                    department: $("#department").val(),
+                    priority: $("#priority").val(),
+                    message: $("#message").val(),
                 };
                 console.log("Form submitted:", formData);
                 alert("Form submitted! Check console for data.");
             });
 
-            clearBtn.addEventListener("click", () => {
+            $clearBtn.on("click", () => {
                 [
                     "firstName",
                     "lastName",
@@ -858,12 +826,12 @@ Be friendly and confirm what you've done.`,
                     "priority",
                     "message",
                 ].forEach((id) => {
-                    document.getElementById(id).value = "";
+                    $("#" + id).val("");
                 });
             });
 
             // Allow Enter key to connect
-            clientSecretInput.addEventListener("keypress", (e) => {
+            $clientSecretInput.on("keypress", (e) => {
                 if (e.key === "Enter") toggleConnection();
             });
         </script>

@@ -10,6 +10,6 @@ export default defineConfig({
     minify: false,
     treeshake: true,
     noExternal: [/.*/],
-    globalName: "Aven",
+    globalName: "Atticus",
     platform: "browser",
 });
