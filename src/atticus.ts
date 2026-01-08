@@ -76,7 +76,7 @@ const DEFAULT_UI_CONFIG = {
     autoUpdate: false,
     autoUpdateInterval: 5000,
     d2SnapOptions: {
-        maxTokens: 4096,
+        maxTokens: 32768,
     },
 } as const;
 

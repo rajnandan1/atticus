@@ -222,7 +222,7 @@ interface AtticusConfig {
         autoUpdate?: boolean;
         autoUpdateInterval?: number; // ms, default: 5000
         d2SnapOptions?: {
-            maxTokens?: number; // default: 4096
+            maxTokens?: number; // default: 32768
             assignUniqueIDs?: boolean; // default: true
         };
     };

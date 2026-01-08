@@ -8,7 +8,7 @@ import { d2Snap } from "./D2Snap.dom";
 
 export async function adaptiveD2Snap(
     dom: DOM,
-    maxTokens: number = 4096,
+    maxTokens: number = 32768,
     maxIterations: number = 5,
     options: D2SnapOptions = {}
 ): Promise<

@@ -18,7 +18,7 @@ export interface AgentConfig {
  * D2Snap options for DOM compression.
  */
 export interface D2SnapOptions {
-    /** Maximum tokens for adaptive compression @default 4096 */
+    /** Maximum tokens for adaptive compression @default 32768 */
     maxTokens?: number;
 }
 
